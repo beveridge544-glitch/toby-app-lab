@@ -6,7 +6,7 @@ _Learn about the person you're helping. Update this as you go._
 - **What to call them:** Oliver
 - **Pronouns:** _(optional)_
 - **Timezone:** Europe/London (UK)
-- **Notes:** 21 years old (born 21 May 2004). Works as a nursing associate in A+E at Pinderfields (Wakefield, UK). Lives in Barnsley (S73 0FL), in a 2-bed house, lives alone. Has a car and 2 cats.
+- **Notes:** 21 years old (born 21 May 2004). Works as a nursing associate in A+E at Pinderfields (Wakefield, UK). Lives in Barnsley (S73 0FL), in a 2-bed house, lives alone. Has a car and 2 cats. Has a girlfriend, Aktie (22, born 1 August 2003). Together 3 years; anniversary is 27 April.
 
 ## Context
 
