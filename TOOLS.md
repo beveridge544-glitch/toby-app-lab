@@ -36,10 +36,18 @@ Things like:
 ### Calendar (Oliver)
 
 - Provider: Google Calendar
+- Timezone: `Europe/London`
+
+Primary calendar:
 - Calendar ID: `beveridge544@gmail.com`
 - Public URL: `https://calendar.google.com/calendar/embed?src=beveridge544%40gmail.com&ctz=Europe%2FLondon`
-- Timezone: `Europe/London`
-- Note: currently provided as public calendar link/embed details.
+
+Shift/group calendar:
+- Calendar ID: `9706c9b0ad2fe800df394b3d0ca02d7b0cf0f7111cf73a0d10ae25e0f474660d@group.calendar.google.com`
+- Public URL: `https://calendar.google.com/calendar/embed?src=9706c9b0ad2fe800df394b3d0ca02d7b0cf0f7111cf73a0d10ae25e0f474660d%40group.calendar.google.com&ctz=Europe%2FLondon`
+- iCal URL: `https://calendar.google.com/calendar/ical/9706c9b0ad2fe800df394b3d0ca02d7b0cf0f7111cf73a0d10ae25e0f474660d%40group.calendar.google.com/public/basic.ics`
+
+- Note: currently provided as public links/feeds.
 
 ## Why Separate?
 
