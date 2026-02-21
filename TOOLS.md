@@ -47,6 +47,11 @@ Shift/group calendar:
 - Public URL: `https://calendar.google.com/calendar/embed?src=9706c9b0ad2fe800df394b3d0ca02d7b0cf0f7111cf73a0d10ae25e0f474660d%40group.calendar.google.com&ctz=Europe%2FLondon`
 - iCal URL: `https://calendar.google.com/calendar/ical/9706c9b0ad2fe800df394b3d0ca02d7b0cf0f7111cf73a0d10ae25e0f474660d%40group.calendar.google.com/public/basic.ics`
 
+Additional group calendar:
+- Calendar ID: `b2046a6df10f822856ce550dfb07b7ed7b077be386fcf62d25e9fdbbad115861@group.calendar.google.com`
+- Public URL: `https://calendar.google.com/calendar/embed?src=b2046a6df10f822856ce550dfb07b7ed7b077be386fcf62d25e9fdbbad115861%40group.calendar.google.com&ctz=Europe%2FLondon`
+- iCal URL: `https://calendar.google.com/calendar/ical/b2046a6df10f822856ce550dfb07b7ed7b077be386fcf62d25e9fdbbad115861%40group.calendar.google.com/public/basic.ics`
+
 - Note: currently provided as public links/feeds.
 
 ## Why Separate?
