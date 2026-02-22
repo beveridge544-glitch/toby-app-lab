@@ -35,7 +35,7 @@
         <div class="small">Local reference library + chatbot helper. Verify with local policy / BNF / Medusa.</div>
       </div>
       <div>
-        <span class="pill">Build: 2026-02-22 18:45 UTC</span>
+        <span class="pill">Build: 2026-02-22 19:05 UTC</span>
         <span class="pill">Safety-first</span>
       </div>
     </div>
@@ -138,6 +138,13 @@ Emergency: oxygen must be prescribed (15L NRB in emergency as noted).</pre>
 
 <script>
 const meds = {
+  'Acetylcysteine (SNAP 12h)': {class:'Paracetamol poisoning antidote', prep:'Preferred diluent glucose 5% (NaCl 0.9% if needed). First infusion: remove 50ml from 250ml bag, add dose to remaining 200ml. Second infusion: dilute dose in 1000ml infusion fluid.', admin:'IV infusion pump total 12h: first infusion over 2h, second over next 10h.', notes:'High osmolarity first infusion; monitor for venous irritation/extravasation.'},
+  'Adenosine injection': {class:'Anti-arrhythmic (SVT contexts)', prep:'IV injection may be diluted with NaCl 0.9% if required.', admin:'Give over 2 seconds via central/large peripheral vein, rapid NaCl flush after dose.', notes:'Continuous ECG monitoring; resus facilities available immediately.'},
+  'Adrenaline/epinephrine': {class:'Emergency catecholamine', prep:'For infusion dilute 1mg in 1000ml with glucose 5% (preferred) or NaCl 0.9%; use local standard concentrations.', admin:'Infusion per local critical care standard; specialist uses for cardiac arrest routes as per protocol.', notes:'Check needle-free connector compatibility; high-risk medicine.'},
+  'Amikacin': {class:'Aminoglycoside antibiotic', prep:'Suitable diluents NaCl 0.9% or glucose 5%. IV infusion: add required dose to 100ml diluent.', admin:'Preferred IV infusion over 30–60 mins. IV injection option: give slowly over 2–3 mins.', notes:'May cause venous irritation/extravasation risk; monitor line/site.'},
+  'Amphotericin B liposomal': {class:'Antifungal', prep:'Reconstitute each 50mg vial with 12ml WFI (to 4mg/ml). Further dilute in glucose 5% only to target concentration range per local guidance.', admin:'IV infusion via pump; duration depends on infusion concentration (e.g., around 2h in some ranges).', notes:'Use glucose 5% (not NaCl) for dilution; monitor for infusion reactions.'},
+  'Aspirin (IV)': {class:'Antiplatelet/salicylate', prep:'IV injection: add 5ml WFI to each 500mg vial. IV infusion: reconstitute and dilute required dose in 100–250ml NaCl 0.9% or glucose 5%.', admin:'IV injection over at least 3 minutes. IV infusion via central access or large vein preferred.', notes:'High osmolarity; monitor for venous irritation/extravasation.'},
+
   'Aciclovir': {class:'Antiviral', prep:'250-500mg in 100ml NaCl; 500mg-1g in 250ml NaCl', admin:'Alaris pump over 1 hour', notes:'IV infusion'},
   'Amiodarone': {class:'Anti-arrhythmic', prep:'300mg in 50ml, dilute with 5% glucose (NOT NaCl)', admin:'Give over 20-120 mins', notes:'Infusion only with glucose 5%'},
   'Amoxicillin': {class:'Penicillin antibiotic', prep:'1g vial + 20ml WFI; can add to 100ml NaCl', admin:'Give slowly IV or infusion', notes:'Check allergy'},
