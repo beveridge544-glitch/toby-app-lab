@@ -41,7 +41,7 @@
     </div>
 
     <div class="card full">
-      <div class="k">Skills Manager</div>
+      <div class="k">Skills Manager (all ready skills)</div>
       <div class="list" id="skills"></div>
       <div class="row" style="margin-top:8px">
         <button onclick="toggleSkill('weather')">Toggle weather</button>
@@ -76,7 +76,19 @@
 const state = JSON.parse(localStorage.getItem('toby-home-state')||'null') || {
   model:'Codex OAuth', auth:'OAuth route', heartbeat:'Healthy', cost:0,
   toolCalls:0, inTok:1200, outTok:430,
-  skills:[{id:'weather',on:true,used:3},{id:'tmux',on:true,used:0},{id:'healthcheck',on:true,used:1},{id:'skill-creator',on:true,used:0}],
+  skills:[
+    {id:'coding-agent',on:true,used:0},
+    {id:'gh-issues',on:true,used:0},
+    {id:'github',on:true,used:0},
+    {id:'healthcheck',on:true,used:1},
+    {id:'notion',on:true,used:0},
+    {id:'openai-image-gen',on:true,used:0},
+    {id:'session-logs',on:true,used:0},
+    {id:'skill-creator',on:true,used:0},
+    {id:'tmux',on:true,used:0},
+    {id:'video-frames',on:true,used:0},
+    {id:'weather',on:true,used:3}
+  ],
   feed:[
     '[now] Session booted',
     '[+2m] Routing: Codex OAuth active',
