@@ -24,6 +24,7 @@ _Learn about the person you're helping. Update this as you go._
 - Messaging preference: proactive buzz is welcome anytime (including double messages) for important updates or check-ins.
 - Model/cost preference: for easy routine tasks (like heartbeat checks), prefer the cheapest/free option first; use premium models only when needed.
 - Coding model preference: use Codex GPT-5.2 with xhigh thinking for coding tasks whenever available.
+- Image understanding preference: use Gemini 2.5 Flash whenever available.
 
 ---
 
