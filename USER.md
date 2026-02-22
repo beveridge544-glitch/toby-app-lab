@@ -17,6 +17,7 @@ _Learn about the person you're helping. Update this as you go._
 - Current projects/history: some KDP progress; previously tried a crypto alerts Telegram project and a crypto-related app, but struggled.
 - Skill profile: new to coding with IT experience; needs practical beginner-friendly plans.
 - Budget preference: mainly free tools; never spend money directly. Oliver will handle any payments himself. Ask before any spend and avoid paid actions by default.
+- Temporary instruction (tonight): do not spend any money or trigger any paid actions/services.
 - Risk preference: safe and steady, but open to reasonable experiments.
 - Availability: time is variable, "here and there" around shifts.
 - Current need: practical help building apps and games (currently finding it hard).
