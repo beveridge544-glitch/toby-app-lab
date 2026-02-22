@@ -30,7 +30,7 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Nursing Shift Copilot (MVP-lite v0.2)</h1>
+    <h1>Nursing Shift Copilot (MVP-lite v0.3)</h1>
     <p>Practical prototype for quick handovers and checklists.</p>
 
     <div class="grid">
@@ -44,6 +44,14 @@
 
         <label>Priority risks</label>
         <textarea id="risks" rows="3" placeholder="e.g. sepsis watch, falls, delirium"></textarea>
+
+        <label>Preset</label>
+        <select id="preset" onchange="applyPreset()">
+          <option value="">Choose preset...</option>
+          <option value="aeday">A+E Day</option>
+          <option value="aenight">A+E Night</option>
+          <option value="ward">Ward Round Heavy</option>
+        </select>
 
         <button class="primary" onclick="generateHandover()">Generate handover</button>
 
@@ -76,6 +84,23 @@
       </div>
     </div>
 
+
+    <div class="card" style="margin-top:16px;">
+      <h2>Medication Safety Check (reference-first)</h2>
+      <p class="small">Supportive checklist only — always verify against local policy/BNF/Medusa.</p>
+      <label>Medication</label>
+      <input id="medName" placeholder="e.g. Gentamicin" />
+      <label>Patient factors</label>
+      <textarea id="patientFactors" rows="2" placeholder="e.g. renal impairment, allergy history, weight"></textarea>
+      <label>Route</label>
+      <input id="route" placeholder="e.g. IV" />
+      <button class="primary" onclick="generateMedCheck()">Generate safety checklist</button>
+      <div class="row">
+        <button onclick="copyText('medOut')">Copy</button>
+        <button onclick="downloadText('medOut','med-safety-check.txt')">Download</button>
+      </div>
+      <pre id="medOut"></pre>
+    </div>
     <div class="card" style="margin-top:16px;">
       <h2>Saved History (local only)</h2>
       <p class="small">Stored in your browser on this device.</p>
@@ -89,7 +114,7 @@
         <button onclick="clearHistory()">Clear selected history</button>
       </div>
     </div>
-      <p class="small">Build stamp: 2026-02-22 13:40 UTC</p>
+      <p class="small">Build stamp: 2026-02-22 13:50 UTC</p>
   </div>
 
   <script>
@@ -154,7 +179,46 @@
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
       existing.unshift({ ts: new Date().toISOString(), text });
       localStorage.setItem(key, JSON.stringify(existing.slice(0, 20)));
-      renderHistory();
+  
+    function applyPreset() {
+      const p = document.getElementById('preset').value;
+      if (p === 'aeday') {
+        document.getElementById('ward').value = 'A+E Majors';
+        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
+        document.getElementById('shiftType').value = 'Day shift';
+        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
+      } else if (p === 'aenight') {
+        document.getElementById('ward').value = 'A+E Nights';
+        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
+        document.getElementById('shiftType').value = 'Night shift';
+        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
+      } else if (p === 'ward') {
+        document.getElementById('ward').value = 'Medical Ward';
+        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
+        document.getElementById('shiftType').value = 'Ward round heavy';
+        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
+      }
+    }
+
+    function generateMedCheck() {
+      const med = document.getElementById('medName').value || 'Medication';
+      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
+      const route = document.getElementById('route').value || 'Route not specified';
+      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
+        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
+        `[ ] Confirm patient identity (2 identifiers)\n` +
+        `[ ] Check allergies and previous adverse reactions\n` +
+        `[ ] Verify indication and dose against chart/order\n` +
+        `[ ] Verify dilution/concentration requirements\n` +
+        `[ ] Verify route and administration rate\n` +
+        `[ ] Check renal/hepatic considerations if relevant\n` +
+        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
+        `[ ] Document administration + response\n\n` +
+        `Always verify with local policy/BNF/Medusa before administration.`;
+      document.getElementById('medOut').textContent = out;
+    }
+
+    renderHistory();
       alert('Saved ✅');
     }
 
@@ -179,7 +243,85 @@
     function clearHistory() {
       const type = document.getElementById('historyType').value;
       localStorage.removeItem(`shift-copilot-${type}-history`);
-      renderHistory();
+  
+    function applyPreset() {
+      const p = document.getElementById('preset').value;
+      if (p === 'aeday') {
+        document.getElementById('ward').value = 'A+E Majors';
+        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
+        document.getElementById('shiftType').value = 'Day shift';
+        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
+      } else if (p === 'aenight') {
+        document.getElementById('ward').value = 'A+E Nights';
+        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
+        document.getElementById('shiftType').value = 'Night shift';
+        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
+      } else if (p === 'ward') {
+        document.getElementById('ward').value = 'Medical Ward';
+        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
+        document.getElementById('shiftType').value = 'Ward round heavy';
+        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
+      }
+    }
+
+    function generateMedCheck() {
+      const med = document.getElementById('medName').value || 'Medication';
+      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
+      const route = document.getElementById('route').value || 'Route not specified';
+      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
+        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
+        `[ ] Confirm patient identity (2 identifiers)\n` +
+        `[ ] Check allergies and previous adverse reactions\n` +
+        `[ ] Verify indication and dose against chart/order\n` +
+        `[ ] Verify dilution/concentration requirements\n` +
+        `[ ] Verify route and administration rate\n` +
+        `[ ] Check renal/hepatic considerations if relevant\n` +
+        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
+        `[ ] Document administration + response\n\n` +
+        `Always verify with local policy/BNF/Medusa before administration.`;
+      document.getElementById('medOut').textContent = out;
+    }
+
+    renderHistory();
+    }
+
+
+    function applyPreset() {
+      const p = document.getElementById('preset').value;
+      if (p === 'aeday') {
+        document.getElementById('ward').value = 'A+E Majors';
+        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
+        document.getElementById('shiftType').value = 'Day shift';
+        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
+      } else if (p === 'aenight') {
+        document.getElementById('ward').value = 'A+E Nights';
+        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
+        document.getElementById('shiftType').value = 'Night shift';
+        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
+      } else if (p === 'ward') {
+        document.getElementById('ward').value = 'Medical Ward';
+        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
+        document.getElementById('shiftType').value = 'Ward round heavy';
+        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
+      }
+    }
+
+    function generateMedCheck() {
+      const med = document.getElementById('medName').value || 'Medication';
+      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
+      const route = document.getElementById('route').value || 'Route not specified';
+      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
+        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
+        `[ ] Confirm patient identity (2 identifiers)\n` +
+        `[ ] Check allergies and previous adverse reactions\n` +
+        `[ ] Verify indication and dose against chart/order\n` +
+        `[ ] Verify dilution/concentration requirements\n` +
+        `[ ] Verify route and administration rate\n` +
+        `[ ] Check renal/hepatic considerations if relevant\n` +
+        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
+        `[ ] Document administration + response\n\n` +
+        `Always verify with local policy/BNF/Medusa before administration.`;
+      document.getElementById('medOut').textContent = out;
     }
 
     renderHistory();
