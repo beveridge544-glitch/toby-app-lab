@@ -54,6 +54,13 @@ Additional group calendar:
 
 - Note: currently provided as public links/feeds.
 
+### GitHub CLI
+
+- `gh` installed (v2.45.0)
+- Authenticated account: `beveridge544-glitch`
+- Protocol: HTTPS
+- Scopes: `gist`, `read:org`, `repo`, `workflow`
+
 ## Why Separate?
 
 Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
