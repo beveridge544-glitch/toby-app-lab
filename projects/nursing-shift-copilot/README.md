@@ -1,20 +1,15 @@
-# Nursing Shift Copilot (MVP-lite)
+# Medication Assistant (MVP-lite v0.4)
 
-Practical first build for Oliver.
+Pivoted from generic checklist toward medication workflow support.
 
-## What it does (v0.3)
-- Generates a basic handover template
-- Generates a shift checklist
-- Copy buttons for quick use
-- Download output as `.txt`
-- Save local history in browser (latest 20 per type)
-- Shift presets (A+E Day/Night, Ward Round)
-- Medication safety checklist module (reference-first guardrails)
+## What it does
+- Preparation guide generator
+- Administration flow generator
+- Side effects & red-flag brief
+- Documentation note template
 
-## Run locally
+## Safety
+Decision-support only. Always verify against local policy, BNF, and Medusa before administration.
+
+## Run
 Open `index.html` in a browser.
-
-## Next upgrades
-- Safer/clearer medical prompt constraints
-- Add presets (A+E, Ward, Nights)
-- Optional AI API integration for smarter text generation

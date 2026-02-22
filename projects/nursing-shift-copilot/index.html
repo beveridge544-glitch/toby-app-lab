@@ -3,328 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shift Copilot MVP v0.3</title>
+  <title>Medication Assistant MVP v0.4</title>
   <style>
-    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --ok:#35c68a; }
-    * { box-sizing: border-box; }
-    body { margin:0; font-family: Inter, Arial, sans-serif; background:linear-gradient(180deg,#0b1020,#121a33); color:var(--text); }
-    .wrap { max-width: 980px; margin: 0 auto; padding: 22px; }
-    h1 { margin: 0 0 8px; }
-    p { color: var(--muted); }
-    .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); }
-    .card { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px; }
-    label { display:block; margin-top:8px; font-weight:600; }
-    input, textarea, button, select {
-      width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.18);
-      background:#0e1530; color:var(--text); padding:10px; margin-top:6px;
-    }
-    .row { display:flex; gap:8px; margin-top:8px; }
-    .row button { width:auto; flex:1; }
-    button { cursor:pointer; }
-    .primary { background: linear-gradient(90deg,var(--accent),#8c79ff); border:none; }
-    .good { background: linear-gradient(90deg,var(--ok),#2db5a6); border:none; }
-    pre { white-space: pre-wrap; background:#0a1128; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); min-height:120px; }
-    .small { font-size:12px; color:var(--muted); }
-    ul { margin-top: 8px; }
+    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --ok:#35c68a; --warn:#ffb86b; }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#121a33);color:var(--text)}
+    .wrap{max-width:1000px;margin:0 auto;padding:22px} .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
+    input,textarea,select,button{width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0e1530;color:var(--text)}
+    button{cursor:pointer}.primary{background:linear-gradient(90deg,var(--accent),#8c79ff);border:none}
+    .row{display:flex;gap:8px;margin-top:8px}.row button{flex:1}
+    pre{white-space:pre-wrap;background:#0a1128;border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:8px;min-height:130px}
+    .small{font-size:12px;color:var(--muted)} .warning{color:var(--warn)}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Nursing Shift Copilot (MVP-lite v0.3)</h1>
-    <p>Practical prototype for quick handovers and checklists.</p>
+    <h1>Medication Assistant (MVP-lite v0.4)</h1>
+    <p>Focus: <b>preparing</b>, <b>administering</b>, and <b>side effects/red flags</b>.</p>
+    <p class="small warning">Decision-support only. Always verify against local policy, BNF, and Medusa before administration.</p>
+
+    <div class="card">
+      <label>Medication</label>
+      <input id="med" placeholder="e.g. Gentamicin" />
+      <label>Route</label>
+      <select id="route"><option>IV</option><option>Oral</option><option>IM</option><option>SC</option><option>Nebulised</option></select>
+      <label>Patient factors</label>
+      <textarea id="factors" rows="2" placeholder="e.g. renal impairment, allergy history, frailty"></textarea>
+      <label>Clinical indication</label>
+      <input id="indication" placeholder="e.g. suspected sepsis" />
+    </div>
 
     <div class="grid">
       <div class="card">
-        <h2>Handover Template Generator</h2>
-        <label>Ward / Unit</label>
-        <input id="ward" placeholder="e.g. A+E Majors" />
-
-        <label>Patient count</label>
-        <input id="patients" type="number" placeholder="e.g. 12" />
-
-        <label>Priority risks</label>
-        <textarea id="risks" rows="3" placeholder="e.g. sepsis watch, falls, delirium"></textarea>
-
-        <label>Preset</label>
-        <select id="preset" onchange="applyPreset()">
-          <option value="">Choose preset...</option>
-          <option value="aeday">A+E Day</option>
-          <option value="aenight">A+E Night</option>
-          <option value="ward">Ward Round Heavy</option>
-        </select>
-
-        <button class="primary" onclick="generateHandover()">Generate handover</button>
-
-        <div class="row">
-          <button onclick="copyText('handoverOut')">Copy</button>
-          <button onclick="downloadText('handoverOut','handover-template.txt')">Download</button>
-          <button class="good" onclick="saveHistory('handover')">Save</button>
-        </div>
-
-        <pre id="handoverOut"></pre>
+        <h2>Prepare</h2>
+        <button class="primary" onclick="genPrepare()">Generate preparation guide</button>
+        <div class="row"><button onclick="copyText('prepareOut')">Copy</button><button onclick="downloadText('prepareOut','prepare-guide.txt')">Download</button></div>
+        <pre id="prepareOut"></pre>
       </div>
 
       <div class="card">
-        <h2>Shift Checklist Builder</h2>
-        <label>Shift type</label>
-        <input id="shiftType" placeholder="e.g. Day shift" />
+        <h2>Administer</h2>
+        <button class="primary" onclick="genAdmin()">Generate administration flow</button>
+        <div class="row"><button onclick="copyText('adminOut')">Copy</button><button onclick="downloadText('adminOut','admin-flow.txt')">Download</button></div>
+        <pre id="adminOut"></pre>
+      </div>
 
-        <label>Top priorities (comma separated)</label>
-        <textarea id="priorities" rows="3" placeholder="e.g. obs, meds, discharges"></textarea>
-
-        <button class="primary" onclick="generateChecklist()">Generate checklist</button>
-
-        <div class="row">
-          <button onclick="copyText('checklistOut')">Copy</button>
-          <button onclick="downloadText('checklistOut','shift-checklist.txt')">Download</button>
-          <button class="good" onclick="saveHistory('checklist')">Save</button>
-        </div>
-
-        <pre id="checklistOut"></pre>
+      <div class="card">
+        <h2>Side effects & red flags</h2>
+        <button class="primary" onclick="genEffects()">Generate side-effects brief</button>
+        <div class="row"><button onclick="copyText('effectsOut')">Copy</button><button onclick="downloadText('effectsOut','side-effects-redflags.txt')">Download</button></div>
+        <pre id="effectsOut"></pre>
       </div>
     </div>
 
-
-    <div class="card" style="margin-top:16px;">
-      <h2>Medication Safety Check (reference-first)</h2>
-      <p class="small">Supportive checklist only — always verify against local policy/BNF/Medusa.</p>
-      <label>Medication</label>
-      <input id="medName" placeholder="e.g. Gentamicin" />
-      <label>Patient factors</label>
-      <textarea id="patientFactors" rows="2" placeholder="e.g. renal impairment, allergy history, weight"></textarea>
-      <label>Route</label>
-      <input id="route" placeholder="e.g. IV" />
-      <button class="primary" onclick="generateMedCheck()">Generate safety checklist</button>
-      <div class="row">
-        <button onclick="copyText('medOut')">Copy</button>
-        <button onclick="downloadText('medOut','med-safety-check.txt')">Download</button>
-      </div>
-      <pre id="medOut"></pre>
+    <div class="card" style="margin-top:16px">
+      <h2>Documentation helper</h2>
+      <button class="primary" onclick="genDoc()">Generate documentation note template</button>
+      <pre id="docOut"></pre>
+      <p class="small">Build stamp: 2026-02-22 14:00 UTC</p>
     </div>
-    <div class="card" style="margin-top:16px;">
-      <h2>Saved History (local only)</h2>
-      <p class="small">Stored in your browser on this device.</p>
-      <select id="historyType" onchange="renderHistory()">
-        <option value="handover">Handover</option>
-        <option value="checklist">Checklist</option>
-      </select>
-      <ul id="historyList"></ul>
-      <div class="row">
-        <button onclick="renderHistory()">Refresh</button>
-        <button onclick="clearHistory()">Clear selected history</button>
-      </div>
-    </div>
-      <p class="small">Build stamp: 2026-02-22 13:50 UTC</p>
   </div>
 
   <script>
-    function generateHandover() {
-      const ward = document.getElementById('ward').value || 'Ward not set';
-      const patients = document.getElementById('patients').value || '?';
-      const risks = document.getElementById('risks').value || 'None stated';
+    const v = (id, fallback='Not specified') => document.getElementById(id).value?.trim() || fallback;
 
-      const txt = `HANDOVER — ${ward}\n` +
-        `Patient count: ${patients}\n\n` +
-        `1) Situation\n- Current workload summary\n\n` +
-        `2) High-risk patients / issues\n- ${risks}\n\n` +
-        `3) Outstanding tasks\n- [ ] Time-critical meds\n- [ ] Escalations / reviews\n- [ ] Results to chase\n\n` +
-        `4) Safety focus for next team\n- Sepsis / falls / deterioration checks\n\n` +
-        `5) Staffing / flow notes\n- Any shortages, bed pressures, delays`;
-
-      document.getElementById('handoverOut').textContent = txt;
+    function genPrepare(){
+      const med=v('med','Medication'), route=v('route'), factors=v('factors','None stated');
+      const out = `PREPARATION GUIDE — ${med} (${route})\n\n`+
+      `1) Verify order\n- Confirm medication, indication, dose, frequency, route with chart/order\n\n`+
+      `2) Patient safety checks\n- 2 identifiers\n- Allergy status\n- Relevant factors: ${factors}\n\n`+
+      `3) Reference verification\n- Check local policy + BNF + Medusa for preparation specifics\n- Confirm dilution/concentration and compatibility requirements\n\n`+
+      `4) Equipment prep\n- Correct syringes/fluids/devices\n- Label prepared medication clearly\n\n`+
+      `5) Final pre-admin pause\n- Right patient, medicine, dose, route, time\n- Clarify any ambiguity before proceeding`;
+      document.getElementById('prepareOut').textContent = out;
     }
 
-    function generateChecklist() {
-      const shiftType = document.getElementById('shiftType').value || 'Shift';
-      const priorities = (document.getElementById('priorities').value || '')
-        .split(',').map(s => s.trim()).filter(Boolean);
-      const top = priorities.length ? priorities : ['Obs due', 'Meds due', 'Escalations'];
-
-      const lines = [
-        `${shiftType.toUpperCase()} CHECKLIST`,
-        '',
-        '[ ] Safety huddle complete',
-        '[ ] Worklist reviewed',
-        ...top.map(p => `[ ] Priority: ${p}`),
-        '[ ] Documentation up to date',
-        '[ ] Handover prep started (last 60 mins)'
-      ];
-
-      document.getElementById('checklistOut').textContent = lines.join('\n');
+    function genAdmin(){
+      const med=v('med','Medication'), route=v('route'), indication=v('indication','Not stated');
+      const out = `ADMINISTRATION FLOW — ${med} (${route})\nIndication: ${indication}\n\n`+
+      `1) Explain to patient and obtain consent where appropriate\n`+
+      `2) Baseline checks/observations as required by policy\n`+
+      `3) Administer using approved technique for ${route}\n`+
+      `4) Monitor during administration for immediate adverse response\n`+
+      `5) Re-check clinical response and required observations after administration\n`+
+      `6) Escalate promptly if any deterioration or concern\n\n`+
+      `Use local protocol timing/rate parameters (do not rely on generic text alone).`;
+      document.getElementById('adminOut').textContent = out;
     }
 
-    async function copyText(id) {
-      const text = document.getElementById(id).textContent.trim();
-      if (!text) return alert('Nothing to copy yet.');
-      await navigator.clipboard.writeText(text);
-      alert('Copied ✅');
+    function genEffects(){
+      const med=v('med','Medication');
+      const out = `SIDE EFFECTS & RED FLAGS — ${med}\n\n`+
+      `Common side effects (example structure)\n- GI upset, dizziness, mild rash, headache\n\n`+
+      `RED FLAGS (escalate immediately)\n- Airway/breathing compromise\n- Severe hypotension/syncope\n- Widespread rash or anaphylaxis signs\n- Acute confusion/deterioration post-administration\n\n`+
+      `If red flag present:\n- Stop administration (if in progress)\n- Call for senior help immediately\n- Follow emergency/anaphylaxis protocol\n- Document event and timing`;
+      document.getElementById('effectsOut').textContent = out;
     }
 
-    function downloadText(id, fileName) {
-      const text = document.getElementById(id).textContent.trim();
-      if (!text) return alert('Nothing to download yet.');
-      const blob = new Blob([text], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(a.href);
+    function genDoc(){
+      const med=v('med','Medication'), route=v('route');
+      document.getElementById('docOut').textContent =
+`DOCUMENTATION TEMPLATE\n\nMedication: ${med}\nRoute: ${route}\nTime given: ____\nDose given: ____\nIndication: ____\nPre-checks completed: yes/no\nPatient response: ____\nObserved side effects: ____\nEscalation required: yes/no (details)\nSignature/name: ____`;
     }
 
-    function saveHistory(type) {
-      const id = type === 'handover' ? 'handoverOut' : 'checklistOut';
-      const text = document.getElementById(id).textContent.trim();
-      if (!text) return alert('Generate something first.');
-      const key = `shift-copilot-${type}-history`;
-      const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      existing.unshift({ ts: new Date().toISOString(), text });
-      localStorage.setItem(key, JSON.stringify(existing.slice(0, 20)));
-  
-    function applyPreset() {
-      const p = document.getElementById('preset').value;
-      if (p === 'aeday') {
-        document.getElementById('ward').value = 'A+E Majors';
-        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
-        document.getElementById('shiftType').value = 'Day shift';
-        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
-      } else if (p === 'aenight') {
-        document.getElementById('ward').value = 'A+E Nights';
-        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
-        document.getElementById('shiftType').value = 'Night shift';
-        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
-      } else if (p === 'ward') {
-        document.getElementById('ward').value = 'Medical Ward';
-        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
-        document.getElementById('shiftType').value = 'Ward round heavy';
-        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
-      }
-    }
-
-    function generateMedCheck() {
-      const med = document.getElementById('medName').value || 'Medication';
-      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
-      const route = document.getElementById('route').value || 'Route not specified';
-      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
-        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
-        `[ ] Confirm patient identity (2 identifiers)\n` +
-        `[ ] Check allergies and previous adverse reactions\n` +
-        `[ ] Verify indication and dose against chart/order\n` +
-        `[ ] Verify dilution/concentration requirements\n` +
-        `[ ] Verify route and administration rate\n` +
-        `[ ] Check renal/hepatic considerations if relevant\n` +
-        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
-        `[ ] Document administration + response\n\n` +
-        `Always verify with local policy/BNF/Medusa before administration.`;
-      document.getElementById('medOut').textContent = out;
-    }
-
-    renderHistory();
-      alert('Saved ✅');
-    }
-
-    function renderHistory() {
-      const type = document.getElementById('historyType').value;
-      const key = `shift-copilot-${type}-history`;
-      const items = JSON.parse(localStorage.getItem(key) || '[]');
-      const list = document.getElementById('historyList');
-      list.innerHTML = '';
-      if (!items.length) {
-        list.innerHTML = '<li>No saved items yet.</li>';
-        return;
-      }
-      items.forEach((item, idx) => {
-        const li = document.createElement('li');
-        const when = new Date(item.ts).toLocaleString();
-        li.textContent = `${idx + 1}. ${when} — ${item.text.slice(0, 70).replace(/\n/g,' ')}...`;
-        list.appendChild(li);
-      });
-    }
-
-    function clearHistory() {
-      const type = document.getElementById('historyType').value;
-      localStorage.removeItem(`shift-copilot-${type}-history`);
-  
-    function applyPreset() {
-      const p = document.getElementById('preset').value;
-      if (p === 'aeday') {
-        document.getElementById('ward').value = 'A+E Majors';
-        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
-        document.getElementById('shiftType').value = 'Day shift';
-        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
-      } else if (p === 'aenight') {
-        document.getElementById('ward').value = 'A+E Nights';
-        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
-        document.getElementById('shiftType').value = 'Night shift';
-        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
-      } else if (p === 'ward') {
-        document.getElementById('ward').value = 'Medical Ward';
-        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
-        document.getElementById('shiftType').value = 'Ward round heavy';
-        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
-      }
-    }
-
-    function generateMedCheck() {
-      const med = document.getElementById('medName').value || 'Medication';
-      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
-      const route = document.getElementById('route').value || 'Route not specified';
-      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
-        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
-        `[ ] Confirm patient identity (2 identifiers)\n` +
-        `[ ] Check allergies and previous adverse reactions\n` +
-        `[ ] Verify indication and dose against chart/order\n` +
-        `[ ] Verify dilution/concentration requirements\n` +
-        `[ ] Verify route and administration rate\n` +
-        `[ ] Check renal/hepatic considerations if relevant\n` +
-        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
-        `[ ] Document administration + response\n\n` +
-        `Always verify with local policy/BNF/Medusa before administration.`;
-      document.getElementById('medOut').textContent = out;
-    }
-
-    renderHistory();
-    }
-
-
-    function applyPreset() {
-      const p = document.getElementById('preset').value;
-      if (p === 'aeday') {
-        document.getElementById('ward').value = 'A+E Majors';
-        document.getElementById('risks').value = 'Sepsis watch, chest pain escalations, falls risk';
-        document.getElementById('shiftType').value = 'Day shift';
-        document.getElementById('priorities').value = 'Obs due, meds due, discharges';
-      } else if (p === 'aenight') {
-        document.getElementById('ward').value = 'A+E Nights';
-        document.getElementById('risks').value = 'Deterioration overnight, safeguarding flags, staffing pressure';
-        document.getElementById('shiftType').value = 'Night shift';
-        document.getElementById('priorities').value = 'Obs due, escalation plan, handover prep';
-      } else if (p === 'ward') {
-        document.getElementById('ward').value = 'Medical Ward';
-        document.getElementById('risks').value = 'Delirium, falls prevention, discharge bottlenecks';
-        document.getElementById('shiftType').value = 'Ward round heavy';
-        document.getElementById('priorities').value = 'Round actions, med chart checks, family updates';
-      }
-    }
-
-    function generateMedCheck() {
-      const med = document.getElementById('medName').value || 'Medication';
-      const factors = document.getElementById('patientFactors').value || 'No additional factors entered';
-      const route = document.getElementById('route').value || 'Route not specified';
-      const out = `MEDICATION SAFETY CHECK — ${med}\n\n` +
-        `Patient factors: ${factors}\nRoute: ${route}\n\n` +
-        `[ ] Confirm patient identity (2 identifiers)\n` +
-        `[ ] Check allergies and previous adverse reactions\n` +
-        `[ ] Verify indication and dose against chart/order\n` +
-        `[ ] Verify dilution/concentration requirements\n` +
-        `[ ] Verify route and administration rate\n` +
-        `[ ] Check renal/hepatic considerations if relevant\n` +
-        `[ ] Confirm monitoring plan (obs, bloods, ECG if needed)\n` +
-        `[ ] Document administration + response\n\n` +
-        `Always verify with local policy/BNF/Medusa before administration.`;
-      document.getElementById('medOut').textContent = out;
-    }
-
-    renderHistory();
+    async function copyText(id){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); await navigator.clipboard.writeText(t); alert('Copied ✅'); }
+    function downloadText(id,name){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); const b=new Blob([t],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
   </script>
 </body>
 </html>
