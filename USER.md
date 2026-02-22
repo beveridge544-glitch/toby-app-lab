@@ -21,6 +21,7 @@ _Learn about the person you're helping. Update this as you go._
 - Availability: time is variable, "here and there" around shifts.
 - Current need: practical help building apps and games (currently finding it hard).
 - Preferred assistant style: adventurous, proactive support.
+- Messaging preference: proactive buzz is welcome anytime (including double messages) for important updates or check-ins.
 
 ---
 
