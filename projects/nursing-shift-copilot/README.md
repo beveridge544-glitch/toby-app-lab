@@ -2,14 +2,17 @@
 
 Practical first build for Oliver.
 
-## What it does (v0)
+## What it does (v0.2)
 - Generates a basic handover template
 - Generates a shift checklist
+- Copy buttons for quick use
+- Download output as `.txt`
+- Save local history in browser (latest 20 per type)
 
 ## Run locally
 Open `index.html` in a browser.
 
 ## Next upgrades
-- Save templates/history
-- Better medically-safe prompt structure
+- Safer/clearer medical prompt constraints
+- Add presets (A+E, Ward, Nights)
 - Optional AI API integration for smarter text generation
