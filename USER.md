@@ -22,6 +22,7 @@ _Learn about the person you're helping. Update this as you go._
 - Current need: practical help building apps and games (currently finding it hard).
 - Preferred assistant style: adventurous, proactive support.
 - Messaging preference: proactive buzz is welcome anytime (including double messages) for important updates or check-ins.
+- Model/cost preference: for easy routine tasks (like heartbeat checks), prefer the cheapest/free option first; use premium models only when needed.
 
 ---
 
