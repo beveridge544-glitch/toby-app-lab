@@ -3,107 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Medication Assistant MVP v0.4</title>
+  <title>Medication Assistant MVP v0.5</title>
   <style>
-    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --ok:#35c68a; --warn:#ffb86b; }
+    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --warn:#ffb86b; }
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#121a33);color:var(--text)}
-    .wrap{max-width:1000px;margin:0 auto;padding:22px} .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    .wrap{max-width:1050px;margin:0 auto;padding:20px} .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
     .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
     input,textarea,select,button{width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0e1530;color:var(--text)}
     button{cursor:pointer}.primary{background:linear-gradient(90deg,var(--accent),#8c79ff);border:none}
     .row{display:flex;gap:8px;margin-top:8px}.row button{flex:1}
-    pre{white-space:pre-wrap;background:#0a1128;border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:8px;min-height:130px}
+    pre{white-space:pre-wrap;background:#0a1128;border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:8px;min-height:170px}
     .small{font-size:12px;color:var(--muted)} .warning{color:var(--warn)}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Medication Assistant (MVP-lite v0.4)</h1>
-    <p>Focus: <b>preparing</b>, <b>administering</b>, and <b>side effects/red flags</b>.</p>
+    <h1>Medication Assistant (MVP-lite v0.5)</h1>
+    <p>Now includes practical <b>How to Prepare</b> and <b>How to Administer</b> sections with route-specific structure.</p>
     <p class="small warning">Decision-support only. Always verify against local policy, BNF, and Medusa before administration.</p>
 
     <div class="card">
       <label>Medication</label>
-      <input id="med" placeholder="e.g. Gentamicin" />
+      <input id="med" placeholder="e.g. Co-amoxiclav" />
+
       <label>Route</label>
-      <select id="route"><option>IV</option><option>Oral</option><option>IM</option><option>SC</option><option>Nebulised</option></select>
+      <select id="route">
+        <option>IV infusion</option>
+        <option>IV bolus</option>
+        <option>Oral</option>
+        <option>IM</option>
+        <option>SC</option>
+        <option>Nebulised</option>
+      </select>
+
+      <label>Indication</label>
+      <input id="indication" placeholder="e.g. chest sepsis" />
+
+      <label>Preparation details you know</label>
+      <textarea id="prepKnown" rows="2" placeholder="e.g. vial strength, diluent available, line in situ"></textarea>
+
       <label>Patient factors</label>
-      <textarea id="factors" rows="2" placeholder="e.g. renal impairment, allergy history, frailty"></textarea>
-      <label>Clinical indication</label>
-      <input id="indication" placeholder="e.g. suspected sepsis" />
+      <textarea id="factors" rows="2" placeholder="e.g. allergy history, renal function, frailty"></textarea>
+
+      <label>Rate / timing target (if known)</label>
+      <input id="rate" placeholder="e.g. infuse over 30 mins" />
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2>Prepare</h2>
-        <button class="primary" onclick="genPrepare()">Generate preparation guide</button>
-        <div class="row"><button onclick="copyText('prepareOut')">Copy</button><button onclick="downloadText('prepareOut','prepare-guide.txt')">Download</button></div>
+        <h2>How to Prepare</h2>
+        <button class="primary" onclick="genPrepare()">Generate</button>
+        <div class="row"><button onclick="copyText('prepareOut')">Copy</button><button onclick="downloadText('prepareOut','how-to-prepare.txt')">Download</button></div>
         <pre id="prepareOut"></pre>
       </div>
 
       <div class="card">
-        <h2>Administer</h2>
-        <button class="primary" onclick="genAdmin()">Generate administration flow</button>
-        <div class="row"><button onclick="copyText('adminOut')">Copy</button><button onclick="downloadText('adminOut','admin-flow.txt')">Download</button></div>
+        <h2>How to Administer</h2>
+        <button class="primary" onclick="genAdmin()">Generate</button>
+        <div class="row"><button onclick="copyText('adminOut')">Copy</button><button onclick="downloadText('adminOut','how-to-administer.txt')">Download</button></div>
         <pre id="adminOut"></pre>
       </div>
 
       <div class="card">
         <h2>Side effects & red flags</h2>
-        <button class="primary" onclick="genEffects()">Generate side-effects brief</button>
+        <button class="primary" onclick="genEffects()">Generate</button>
         <div class="row"><button onclick="copyText('effectsOut')">Copy</button><button onclick="downloadText('effectsOut','side-effects-redflags.txt')">Download</button></div>
         <pre id="effectsOut"></pre>
       </div>
     </div>
 
-    <div class="card" style="margin-top:16px">
+    <div class="card" style="margin-top:14px">
       <h2>Documentation helper</h2>
-      <button class="primary" onclick="genDoc()">Generate documentation note template</button>
+      <button class="primary" onclick="genDoc()">Generate note template</button>
       <pre id="docOut"></pre>
-      <p class="small">Build stamp: 2026-02-22 14:00 UTC</p>
+      <p class="small">Build stamp: 2026-02-22 14:05 UTC</p>
     </div>
   </div>
 
   <script>
-    const v = (id, fallback='Not specified') => document.getElementById(id).value?.trim() || fallback;
+    const v=(id,f='Not specified')=>document.getElementById(id).value?.trim()||f;
+
+    function routePrepLines(route){
+      if(route.includes('IV infusion')) return [
+        '- Confirm compatible diluent and final concentration per policy/BNF/Medusa',
+        '- Reconstitute vial if required using approved diluent/volume',
+        '- Further dilute to infusion bag/syringe as locally specified',
+        '- Label syringe/bag (drug, dose, concentration, time prepared, initials)',
+        '- Prime giving set / ensure dedicated compatible line where required'
+      ];
+      if(route.includes('IV bolus')) return [
+        '- Confirm if undiluted or diluted bolus is required in local guidance',
+        '- Prepare exact volume in luer-lock syringe',
+        '- Label syringe clearly before bedside administration',
+        '- Ensure flush available if protocol requires pre/post flush'
+      ];
+      if(route==='Oral') return [
+        '- Confirm formulation (tablet/capsule/liquid) and swallowing ability',
+        '- If crushing/splitting considered, verify it is allowed',
+        '- Measure liquid dose accurately using oral syringe/medicine cup'
+      ];
+      if(route==='IM' || route==='SC') return [
+        '- Confirm site suitability and local technique guidance',
+        '- Prepare correct needle/syringe size and dose volume',
+        '- Check max volume per site per local policy'
+      ];
+      return ['- Prepare using route-specific local guidance and approved equipment'];
+    }
+
+    function routeAdminLines(route, rate){
+      if(route.includes('IV infusion')) return [
+        '- Baseline observations before starting infusion',
+        `- Start infusion using approved pump setup (${rate})`,
+        '- Monitor cannula site and patient tolerance during infusion',
+        '- Re-check observations post-infusion per protocol'
+      ];
+      if(route.includes('IV bolus')) return [
+        `- Administer slowly over approved timeframe (${rate})`,
+        '- Observe continuously for immediate adverse effects',
+        '- Flush line if required by local protocol'
+      ];
+      if(route==='Oral') return [
+        '- Confirm patient can safely swallow and is appropriate for oral route',
+        '- Administer with water/food guidance if required',
+        '- Ensure full dose taken and document refusal/vomiting if occurs'
+      ];
+      if(route==='IM') return [
+        '- Use correct IM site/technique per local protocol',
+        '- Inject at appropriate rate and angle',
+        '- Observe for pain, bleeding, immediate reactions'
+      ];
+      if(route==='SC') return [
+        '- Select appropriate SC site and rotate sites when relevant',
+        '- Administer with correct SC technique',
+        '- Monitor site for irritation/swelling'
+      ];
+      return ['- Administer per route-specific protocol and monitor patient response'];
+    }
 
     function genPrepare(){
-      const med=v('med','Medication'), route=v('route'), factors=v('factors','None stated');
-      const out = `PREPARATION GUIDE — ${med} (${route})\n\n`+
-      `1) Verify order\n- Confirm medication, indication, dose, frequency, route with chart/order\n\n`+
-      `2) Patient safety checks\n- 2 identifiers\n- Allergy status\n- Relevant factors: ${factors}\n\n`+
-      `3) Reference verification\n- Check local policy + BNF + Medusa for preparation specifics\n- Confirm dilution/concentration and compatibility requirements\n\n`+
-      `4) Equipment prep\n- Correct syringes/fluids/devices\n- Label prepared medication clearly\n\n`+
-      `5) Final pre-admin pause\n- Right patient, medicine, dose, route, time\n- Clarify any ambiguity before proceeding`;
-      document.getElementById('prepareOut').textContent = out;
+      const med=v('med','Medication'), route=v('route'), factors=v('factors','None stated'), prepKnown=v('prepKnown','None provided');
+      const lines = routePrepLines(route).join('\n');
+      document.getElementById('prepareOut').textContent =
+`HOW TO PREPARE — ${med} (${route})\n\n`+
+`Pre-prep safety checks\n`+
+`- Confirm order: right medicine, dose, route, timing, indication\n`+
+`- 2 patient identifiers + allergy status\n`+
+`- Review patient factors: ${factors}\n\n`+
+`Practical preparation steps\n${lines}\n\n`+
+`Local info entered\n- ${prepKnown}\n\n`+
+`Final pause before admin\n- Re-verify with local policy + BNF + Medusa before giving.`;
     }
 
     function genAdmin(){
-      const med=v('med','Medication'), route=v('route'), indication=v('indication','Not stated');
-      const out = `ADMINISTRATION FLOW — ${med} (${route})\nIndication: ${indication}\n\n`+
-      `1) Explain to patient and obtain consent where appropriate\n`+
-      `2) Baseline checks/observations as required by policy\n`+
-      `3) Administer using approved technique for ${route}\n`+
-      `4) Monitor during administration for immediate adverse response\n`+
-      `5) Re-check clinical response and required observations after administration\n`+
-      `6) Escalate promptly if any deterioration or concern\n\n`+
-      `Use local protocol timing/rate parameters (do not rely on generic text alone).`;
-      document.getElementById('adminOut').textContent = out;
+      const med=v('med','Medication'), route=v('route'), indication=v('indication','Not stated'), rate=v('rate','use local protocol timing/rate');
+      const lines = routeAdminLines(route, rate).join('\n');
+      document.getElementById('adminOut').textContent =
+`HOW TO ADMINISTER — ${med} (${route})\nIndication: ${indication}\n\n`+
+`Before administration\n- Explain to patient, gain consent where appropriate\n- Baseline observations as required\n\n`+
+`Administration flow\n${lines}\n\n`+
+`After administration\n- Reassess response and required observations\n- Escalate immediately if deterioration or reaction\n- Document dose/time/response clearly`;
     }
 
     function genEffects(){
       const med=v('med','Medication');
-      const out = `SIDE EFFECTS & RED FLAGS — ${med}\n\n`+
-      `Common side effects (example structure)\n- GI upset, dizziness, mild rash, headache\n\n`+
-      `RED FLAGS (escalate immediately)\n- Airway/breathing compromise\n- Severe hypotension/syncope\n- Widespread rash or anaphylaxis signs\n- Acute confusion/deterioration post-administration\n\n`+
-      `If red flag present:\n- Stop administration (if in progress)\n- Call for senior help immediately\n- Follow emergency/anaphylaxis protocol\n- Document event and timing`;
-      document.getElementById('effectsOut').textContent = out;
+      document.getElementById('effectsOut').textContent =
+`SIDE EFFECTS & RED FLAGS — ${med}\n\n`+
+`Common effects (examples only)\n- Nausea, dizziness, headache, mild rash\n\n`+
+`RED FLAGS (urgent escalation)\n- Airway/breathing compromise\n- Hypotension/syncope\n- Widespread rash / anaphylaxis signs\n- Acute deterioration post-dose\n\n`+
+`If red flag present\n- Stop administration (if ongoing)\n- Call senior help immediately\n- Follow emergency/anaphylaxis protocol\n- Document timing/actions`;
     }
 
     function genDoc(){
       const med=v('med','Medication'), route=v('route');
       document.getElementById('docOut').textContent =
-`DOCUMENTATION TEMPLATE\n\nMedication: ${med}\nRoute: ${route}\nTime given: ____\nDose given: ____\nIndication: ____\nPre-checks completed: yes/no\nPatient response: ____\nObserved side effects: ____\nEscalation required: yes/no (details)\nSignature/name: ____`;
+`DOCUMENTATION TEMPLATE\n\nMedication: ${med}\nRoute: ${route}\nDose/time: ____\nIndication: ____\nPrep checks complete: yes/no\nAdmin method/rate: ____\nPatient response: ____\nSide effects/red flags: ____\nEscalation actions: ____\nSignature/name: ____`;
     }
 
     async function copyText(id){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); await navigator.clipboard.writeText(t); alert('Copied ✅'); }

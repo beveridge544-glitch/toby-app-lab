@@ -1,15 +1,13 @@
-# Medication Assistant (MVP-lite v0.4)
-
-Pivoted from generic checklist toward medication workflow support.
+# Medication Assistant (MVP-lite v0.5)
 
 ## What it does
-- Preparation guide generator
-- Administration flow generator
-- Side effects & red-flag brief
-- Documentation note template
+- Generates practical **How to Prepare** steps (route-structured)
+- Generates practical **How to Administer** flow (route-structured)
+- Generates side effects + red flags brief
+- Generates documentation template
 
 ## Safety
 Decision-support only. Always verify against local policy, BNF, and Medusa before administration.
 
 ## Run
-Open `index.html` in a browser.
+Open `index.html` in browser.
