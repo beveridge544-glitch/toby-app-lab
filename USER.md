@@ -22,9 +22,13 @@ _Learn about the person you're helping. Update this as you go._
 - Current need: practical help building apps and games (currently finding it hard).
 - Preferred assistant style: adventurous, proactive support.
 - Messaging preference: proactive buzz is welcome anytime (including double messages) for important updates or check-ins.
-- Model/cost preference: for easy routine tasks (like heartbeat checks), prefer the cheapest/free option first; use premium models only when needed.
-- Coding model preference: use Codex GPT-5.2 with xhigh thinking for coding tasks whenever available.
-- Image understanding preference: use Gemini 2.5 Flash whenever available.
+- Model/cost preference: default to cheap/fast models where possible.
+- Main brain preference: Claude Haiku 4.5 for general tasks (cheap + fast).
+- Coding model preference: Claude Sonnet 4.6 for coding tasks (cost-efficient, strong coding quality), with Codex as fallback when needed.
+- Reasoning/search preference: Gemini Flash.
+- Social analysis preference: Grok (use sparingly).
+- Image understanding preference: Gemini 2.5 Flash whenever available.
+- Heartbeat preference: Haiku.
 
 ---
 
