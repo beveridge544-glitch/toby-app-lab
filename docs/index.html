@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Copilot MVP v0.2</title>
+  <style>
+    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --ok:#35c68a; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, Arial, sans-serif; background:linear-gradient(180deg,#0b1020,#121a33); color:var(--text); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 22px; }
+    h1 { margin: 0 0 8px; }
+    p { color: var(--muted); }
+    .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit,minmax(300px,1fr)); }
+    .card { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:14px; }
+    label { display:block; margin-top:8px; font-weight:600; }
+    input, textarea, button, select {
+      width:100%; border-radius:10px; border:1px solid rgba(255,255,255,0.18);
+      background:#0e1530; color:var(--text); padding:10px; margin-top:6px;
+    }
+    .row { display:flex; gap:8px; margin-top:8px; }
+    .row button { width:auto; flex:1; }
+    button { cursor:pointer; }
+    .primary { background: linear-gradient(90deg,var(--accent),#8c79ff); border:none; }
+    .good { background: linear-gradient(90deg,var(--ok),#2db5a6); border:none; }
+    pre { white-space: pre-wrap; background:#0a1128; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); min-height:120px; }
+    .small { font-size:12px; color:var(--muted); }
+    ul { margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Nursing Shift Copilot (MVP-lite v0.2)</h1>
+    <p>Practical prototype for quick handovers and checklists.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Handover Template Generator</h2>
+        <label>Ward / Unit</label>
+        <input id="ward" placeholder="e.g. A+E Majors" />
+
+        <label>Patient count</label>
+        <input id="patients" type="number" placeholder="e.g. 12" />
+
+        <label>Priority risks</label>
+        <textarea id="risks" rows="3" placeholder="e.g. sepsis watch, falls, delirium"></textarea>
+
+        <button class="primary" onclick="generateHandover()">Generate handover</button>
+
+        <div class="row">
+          <button onclick="copyText('handoverOut')">Copy</button>
+          <button onclick="downloadText('handoverOut','handover-template.txt')">Download</button>
+          <button class="good" onclick="saveHistory('handover')">Save</button>
+        </div>
+
+        <pre id="handoverOut"></pre>
+      </div>
+
+      <div class="card">
+        <h2>Shift Checklist Builder</h2>
+        <label>Shift type</label>
+        <input id="shiftType" placeholder="e.g. Day shift" />
+
+        <label>Top priorities (comma separated)</label>
+        <textarea id="priorities" rows="3" placeholder="e.g. obs, meds, discharges"></textarea>
+
+        <button class="primary" onclick="generateChecklist()">Generate checklist</button>
+
+        <div class="row">
+          <button onclick="copyText('checklistOut')">Copy</button>
+          <button onclick="downloadText('checklistOut','shift-checklist.txt')">Download</button>
+          <button class="good" onclick="saveHistory('checklist')">Save</button>
+        </div>
+
+        <pre id="checklistOut"></pre>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h2>Saved History (local only)</h2>
+      <p class="small">Stored in your browser on this device.</p>
+      <select id="historyType" onchange="renderHistory()">
+        <option value="handover">Handover</option>
+        <option value="checklist">Checklist</option>
+      </select>
+      <ul id="historyList"></ul>
+      <div class="row">
+        <button onclick="renderHistory()">Refresh</button>
+        <button onclick="clearHistory()">Clear selected history</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateHandover() {
+      const ward = document.getElementById('ward').value || 'Ward not set';
+      const patients = document.getElementById('patients').value || '?';
+      const risks = document.getElementById('risks').value || 'None stated';
+
+      const txt = `HANDOVER — ${ward}\n` +
+        `Patient count: ${patients}\n\n` +
+        `1) Situation\n- Current workload summary\n\n` +
+        `2) High-risk patients / issues\n- ${risks}\n\n` +
+        `3) Outstanding tasks\n- [ ] Time-critical meds\n- [ ] Escalations / reviews\n- [ ] Results to chase\n\n` +
+        `4) Safety focus for next team\n- Sepsis / falls / deterioration checks\n\n` +
+        `5) Staffing / flow notes\n- Any shortages, bed pressures, delays`;
+
+      document.getElementById('handoverOut').textContent = txt;
+    }
+
+    function generateChecklist() {
+      const shiftType = document.getElementById('shiftType').value || 'Shift';
+      const priorities = (document.getElementById('priorities').value || '')
+        .split(',').map(s => s.trim()).filter(Boolean);
+      const top = priorities.length ? priorities : ['Obs due', 'Meds due', 'Escalations'];
+
+      const lines = [
+        `${shiftType.toUpperCase()} CHECKLIST`,
+        '',
+        '[ ] Safety huddle complete',
+        '[ ] Worklist reviewed',
+        ...top.map(p => `[ ] Priority: ${p}`),
+        '[ ] Documentation up to date',
+        '[ ] Handover prep started (last 60 mins)'
+      ];
+
+      document.getElementById('checklistOut').textContent = lines.join('\n');
+    }
+
+    async function copyText(id) {
+      const text = document.getElementById(id).textContent.trim();
+      if (!text) return alert('Nothing to copy yet.');
+      await navigator.clipboard.writeText(text);
+      alert('Copied ✅');
+    }
+
+    function downloadText(id, fileName) {
+      const text = document.getElementById(id).textContent.trim();
+      if (!text) return alert('Nothing to download yet.');
+      const blob = new Blob([text], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function saveHistory(type) {
+      const id = type === 'handover' ? 'handoverOut' : 'checklistOut';
+      const text = document.getElementById(id).textContent.trim();
+      if (!text) return alert('Generate something first.');
+      const key = `shift-copilot-${type}-history`;
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      existing.unshift({ ts: new Date().toISOString(), text });
+      localStorage.setItem(key, JSON.stringify(existing.slice(0, 20)));
+      renderHistory();
+      alert('Saved ✅');
+    }
+
+    function renderHistory() {
+      const type = document.getElementById('historyType').value;
+      const key = `shift-copilot-${type}-history`;
+      const items = JSON.parse(localStorage.getItem(key) || '[]');
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      if (!items.length) {
+        list.innerHTML = '<li>No saved items yet.</li>';
+        return;
+      }
+      items.forEach((item, idx) => {
+        const li = document.createElement('li');
+        const when = new Date(item.ts).toLocaleString();
+        li.textContent = `${idx + 1}. ${when} — ${item.text.slice(0, 70).replace(/\n/g,' ')}...`;
+        list.appendChild(li);
+      });
+    }
+
+    function clearHistory() {
+      const type = document.getElementById('historyType').value;
+      localStorage.removeItem(`shift-copilot-${type}-history`);
+      renderHistory();
+    }
+
+    renderHistory();
+  </script>
+</body>
+</html>
