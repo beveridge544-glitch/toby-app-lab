@@ -5,25 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Toby Progress Board</title>
   <style>
-    body{margin:0;font-family:Inter,Arial,sans-serif;background:#0f1220;color:#eef2ff}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px}
-    h1{margin:0 0 8px}.muted{color:#a9b1c9}
-    .controls{display:grid;grid-template-columns:1fr 140px;gap:8px;margin:14px 0}
-    input,button,select{padding:10px;border-radius:10px;border:1px solid #2a3355;background:#141a2e;color:#eef2ff}
-    button{cursor:pointer;background:linear-gradient(90deg,#5e8bff,#7b67ff);border:none}
-    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .col{background:#12182c;border:1px solid #27304f;border-radius:12px;padding:10px;min-height:320px}
-    .col h2{margin:4px 0 10px;font-size:18px}
-    .card{background:#0e1426;border:1px solid #2a3355;border-radius:10px;padding:10px;margin:8px 0}
-    .row{display:flex;gap:6px;align-items:center;justify-content:space-between}
+    :root{
+      --bg:#0b1020;--card:#121a33;--text:#eef2ff;--muted:#a9b1c9;
+      --accent:#6ea8fe;--accent2:#8b7cff;--border:#2a3355;
+      --backlog:#334155;--progress:#7c5cff;--done:#16a34a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:radial-gradient(circle at top,#131c3b,#0b1020 55%);color:var(--text)}
+    .wrap{max-width:1150px;margin:0 auto;padding:20px}
+    .top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center}
+    h1{margin:0;font-size:28px}
+    .muted{color:var(--muted);margin-top:6px}
+    .pill{padding:6px 10px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted);background:#101734}
+
+    .controls{display:grid;grid-template-columns:1fr 160px;gap:10px;margin:16px 0}
+    input,button{padding:12px;border-radius:12px;border:1px solid var(--border);background:#141a2e;color:var(--text)}
+    button{cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;font-weight:600}
+
+    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .col{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:14px;padding:10px;min-height:380px}
+    .colhead{display:flex;justify-content:space-between;align-items:center;padding:4px 4px 8px}
+    .colhead h2{margin:0;font-size:17px}
+    .count{font-size:12px;color:#dbe3ff;padding:4px 8px;border-radius:999px}
+    .count.backlog{background:var(--backlog)}
+    .count.progress{background:var(--progress)}
+    .count.done{background:var(--done)}
+
+    .card{background:#0e1426;border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+    .task{line-height:1.35}
+    .row{display:flex;gap:6px;align-items:center;justify-content:space-between;margin-top:10px}
     .tiny{font-size:12px;color:#9ba5c3}
-    @media (max-width:900px){.board{grid-template-columns:1fr}}
+    .btns{display:flex;gap:6px}
+    .btns button{width:auto;padding:7px 10px;border-radius:8px;font-size:12px}
+    .move{background:linear-gradient(90deg,#5e8bff,#7b67ff)}
+    .del{background:#3a1f2a}
+
+    @media (max-width:900px){
+      .board{grid-template-columns:1fr}
+      .controls{grid-template-columns:1fr}
+      .top{align-items:flex-start}
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Toby Progress Board</h1>
-  <p class="muted">Live-style board for Oliver: backlog, in progress, done.</p>
+  <div class="top">
+    <div>
+      <h1>Toby Progress Board</h1>
+      <div class="muted">Clear view of what’s queued, in motion, and finished.</div>
+    </div>
+    <div class="pill">UI refresh v2</div>
+  </div>
 
   <div class="controls">
     <input id="newTask" placeholder="Add a task..." />
@@ -32,15 +64,15 @@
 
   <div class="board">
     <div class="col">
-      <h2>Backlog</h2>
+      <div class="colhead"><h2>Backlog</h2><span id="c-backlog" class="count backlog">0</span></div>
       <div id="backlog"></div>
     </div>
     <div class="col">
-      <h2>In Progress</h2>
+      <div class="colhead"><h2>In Progress</h2><span id="c-progress" class="count progress">0</span></div>
       <div id="progress"></div>
     </div>
     <div class="col">
-      <h2>Done</h2>
+      <div class="colhead"><h2>Done</h2><span id="c-done" class="count done">0</span></div>
       <div id="done"></div>
     </div>
   </div>
@@ -55,29 +87,33 @@ const seed=[
   {id:4,text:'Add visible WORKLOG.md with daily updates',status:'done'}
 ];
 
-function load(){
-  const raw=localStorage.getItem(KEY);
-  return raw?JSON.parse(raw):seed;
-}
-function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks));}
-function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog';}
-function statusLabel(s){return s==='backlog'?'Backlog':s==='progress'?'In Progress':'Done';}
+function load(){const raw=localStorage.getItem(KEY);return raw?JSON.parse(raw):seed}
+function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks))}
+function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog'}
+function statusLabel(s){return s==='backlog'?'Backlog':s==='progress'?'In Progress':'Done'}
 
 function render(){
   const tasks=load();
+  const buckets={backlog:0,progress:0,done:0};
   ['backlog','progress','done'].forEach(col=>document.getElementById(col).innerHTML='');
+
   tasks.forEach(t=>{
+    buckets[t.status]++;
     const el=document.createElement('div'); el.className='card';
-    el.innerHTML=`<div>${t.text}</div>
+    el.innerHTML=`<div class='task'>${t.text}</div>
       <div class='row'>
         <span class='tiny'>${statusLabel(t.status)}</span>
-        <span>
-          <button onclick="move(${t.id})" style='width:auto;padding:6px 8px'>Move</button>
-          <button onclick="delTask(${t.id})" style='width:auto;padding:6px 8px;background:#3a1f2a'>Delete</button>
+        <span class='btns'>
+          <button class='move' onclick="move(${t.id})">Move</button>
+          <button class='del' onclick="delTask(${t.id})">Delete</button>
         </span>
       </div>`;
     document.getElementById(t.status).appendChild(el);
   });
+
+  document.getElementById('c-backlog').textContent=buckets.backlog;
+  document.getElementById('c-progress').textContent=buckets.progress;
+  document.getElementById('c-done').textContent=buckets.done;
 }
 
 function addTask(){
