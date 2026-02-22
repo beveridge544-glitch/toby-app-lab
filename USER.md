@@ -24,12 +24,13 @@ _Learn about the person you're helping. Update this as you go._
 - Messaging preference: proactive buzz is welcome anytime (including double messages) for important updates or check-ins.
 - Model/cost preference: default to cheap/fast models where possible.
 - Provider routing preference: use API-key providers only when needed; prefer subscription-backed OAuth routes whenever available.
-- Main brain preference: Claude Haiku 4.5 for general tasks (cheap + fast).
-- Coding model preference: Claude Sonnet 4.6 for coding tasks (cost-efficient, strong coding quality), with Codex as fallback when needed.
+- Main brain preference: Codex OAuth for general tasks.
+- Coding model preference: Codex OAuth for coding tasks.
 - Reasoning/search preference: Gemini Flash.
 - Social analysis preference: Grok (use sparingly).
 - Image understanding preference: Gemini 2.5 Flash whenever available.
-- Heartbeat preference: Haiku.
+- Heartbeat preference: Codex OAuth.
+- Hard rule: never use Anthropic API key under any circumstances.
 
 ---
 
