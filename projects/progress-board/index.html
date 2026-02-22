@@ -3,84 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toby Progress Board — Minimal</title>
+  <title>Toby Progress Board — Minimal+</title>
   <style>
-    :root{
-      --bg:#f5f5f7; --panel:#ffffff; --text:#111111; --muted:#6e6e73; --line:#e5e5ea;
-      --backlog:#8e8e93; --progress:#0a84ff; --done:#30d158;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px}
-    h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-0.02em}
+    :root{--bg:#f5f5f7;--panel:#fff;--text:#111;--muted:#6e6e73;--line:#e5e5ea;--backlog:#8e8e93;--progress:#0a84ff;--done:#30d158}
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px} h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-.02em}
     .sub{color:var(--muted);margin:0 0 16px}
-
-    .controls{display:grid;grid-template-columns:1fr 130px;gap:10px;margin-bottom:14px}
-    input,button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:15px}
-    button{cursor:pointer;background:#111;color:#fff;border:none}
-
+    .controls{display:grid;grid-template-columns:1fr 180px 130px;gap:10px;margin-bottom:10px}
+    .controls2{display:grid;grid-template-columns:1fr 180px 130px 130px;gap:10px;margin-bottom:14px}
+    input,button,select{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:15px}
+    button{cursor:pointer} .add{background:#111;color:#fff;border:none}
     .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .col{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:360px}
     .colhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .colhead h2{margin:0;font-size:16px;font-weight:600}
-    .count{font-size:12px;color:#fff;padding:3px 8px;border-radius:999px}
-    .count.backlog{background:var(--backlog)}
-    .count.progress{background:var(--progress)}
-    .count.done{background:var(--done)}
-
+    .count{font-size:12px;color:#fff;padding:3px 8px;border-radius:999px}.count.backlog{background:var(--backlog)}.count.progress{background:var(--progress)}.count.done{background:var(--done)}
     .card{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#fff}
-    .task{font-size:15px;line-height:1.4}
+    .task{font-size:15px;line-height:1.4}.meta{font-size:12px;color:var(--muted);margin-top:6px}
     .row{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
     .mini{border:1px solid var(--line);background:#fff;color:#111;padding:6px 9px;border-radius:8px;font-size:12px;cursor:pointer}
     .mini.del{color:#ff3b30}
-
-    @media (max-width:900px){.board{grid-template-columns:1fr}.controls{grid-template-columns:1fr}}
+    @media (max-width:900px){.board{grid-template-columns:1fr}.controls,.controls2{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Toby Progress Board</h1>
-  <p class="sub">Simple view: Backlog, In Progress, Done.</p>
+  <p class="sub">Now with project filters + WORKLOG import.</p>
 
   <div class="controls">
     <input id="newTask" placeholder="Add task..." />
-    <button onclick="addTask()">Add</button>
+    <select id="newProject">
+      <option value="App">App</option><option value="KDP">KDP</option><option value="Personal">Personal</option><option value="Other">Other</option>
+    </select>
+    <button class="add" onclick="addTask()">Add</button>
+  </div>
+
+  <div class="controls2">
+    <input id="worklogInput" placeholder="Paste one WORKLOG line and import to backlog..." />
+    <select id="filterProject" onchange="render()">
+      <option value="All">All projects</option><option value="App">App</option><option value="KDP">KDP</option><option value="Personal">Personal</option><option value="Other">Other</option>
+    </select>
+    <button onclick="importWorklogLine()">Import line</button>
+    <button onclick="clearBoard()">Reset board</button>
   </div>
 
   <div class="board">
-    <div class="col">
-      <div class="colhead"><h2>Backlog</h2><span id="c-backlog" class="count backlog">0</span></div>
-      <div id="backlog"></div>
-    </div>
-    <div class="col">
-      <div class="colhead"><h2>In Progress</h2><span id="c-progress" class="count progress">0</span></div>
-      <div id="progress"></div>
-    </div>
-    <div class="col">
-      <div class="colhead"><h2>Done</h2><span id="c-done" class="count done">0</span></div>
-      <div id="done"></div>
-    </div>
+    <div class="col"><div class="colhead"><h2>Backlog</h2><span id="c-backlog" class="count backlog">0</span></div><div id="backlog"></div></div>
+    <div class="col"><div class="colhead"><h2>In Progress</h2><span id="c-progress" class="count progress">0</span></div><div id="progress"></div></div>
+    <div class="col"><div class="colhead"><h2>Done</h2><span id="c-done" class="count done">0</span></div><div id="done"></div></div>
   </div>
 </div>
 
 <script>
-const KEY='toby-progress-board-minimal-v1';
+const KEY='toby-progress-board-minimal-v2';
 const seed=[
-  {id:1,text:'Expand medication list with priority meds',status:'backlog'},
-  {id:2,text:'Refine prepare/administer outputs',status:'progress'},
-  {id:3,text:'Ship minimal Apple-style board',status:'done'}
+  {id:1,text:'Expand medication list with priority meds',status:'backlog',project:'App'},
+  {id:2,text:'Refine prepare/administer outputs',status:'progress',project:'App'},
+  {id:3,text:'Track KDP listing improvements',status:'backlog',project:'KDP'},
+  {id:4,text:'Ship minimal board + worklog import',status:'done',project:'App'}
 ];
 function load(){const raw=localStorage.getItem(KEY); return raw?JSON.parse(raw):seed}
 function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks))}
 function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog'}
+function activeFilter(){return document.getElementById('filterProject').value||'All'}
+
 function render(){
   const tasks=load();
+  const filter=activeFilter();
+  const shown = filter==='All' ? tasks : tasks.filter(t=>t.project===filter);
   const buckets={backlog:0,progress:0,done:0};
   ['backlog','progress','done'].forEach(c=>document.getElementById(c).innerHTML='');
-  tasks.forEach(t=>{
+  shown.forEach(t=>{
     buckets[t.status]++;
     const el=document.createElement('div'); el.className='card';
     el.innerHTML=`<div class='task'>${t.text}</div>
+      <div class='meta'>Project: ${t.project}</div>
       <div class='row'>
         <button class='mini' onclick='move(${t.id})'>Move</button>
         <button class='mini del' onclick='delTask(${t.id})'>Delete</button>
@@ -91,9 +89,22 @@ function render(){
   document.getElementById('c-progress').textContent=buckets.progress;
   document.getElementById('c-done').textContent=buckets.done;
 }
-function addTask(){const i=document.getElementById('newTask'); const text=i.value.trim(); if(!text) return; const t=load(); t.unshift({id:Date.now(),text,status:'backlog'}); save(t); i.value=''; render();}
+
+function addTask(){
+  const i=document.getElementById('newTask'); const p=document.getElementById('newProject');
+  const text=i.value.trim(); if(!text) return;
+  const t=load(); t.unshift({id:Date.now(),text,status:'backlog',project:p.value||'Other'}); save(t);
+  i.value=''; render();
+}
+function importWorklogLine(){
+  const i=document.getElementById('worklogInput'); const text=i.value.trim(); if(!text) return;
+  const guessed = /kdp/i.test(text)?'KDP':/app|deploy|ui|feature|medication/i.test(text)?'App':'Other';
+  const t=load(); t.unshift({id:Date.now(),text,status:'backlog',project:guessed}); save(t);
+  i.value=''; render();
+}
 function move(id){save(load().map(t=>t.id===id?({...t,status:nextStatus(t.status)}):t)); render();}
 function delTask(id){save(load().filter(t=>t.id!==id)); render();}
+function clearBoard(){localStorage.removeItem(KEY); render();}
 render();
 </script>
 </body>
