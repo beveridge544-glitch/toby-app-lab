@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Copilot MVP</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 900px; }
+    h1 { margin-bottom: 8px; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 12px 0; }
+    label { display:block; margin-top:8px; font-weight:600; }
+    input, textarea, button { width:100%; padding:10px; margin-top:6px; }
+    button { cursor:pointer; }
+    pre { white-space: pre-wrap; background:#f7f7f7; padding:10px; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <h1>Nursing Shift Copilot (MVP-lite)</h1>
+  <p>First practical build: handover template + shift checklist generator.</p>
+
+  <div class="card">
+    <h2>Handover Template Generator</h2>
+    <label>Ward / Unit</label>
+    <input id="ward" placeholder="e.g. A+E Majors" />
+    <label>Patient count</label>
+    <input id="patients" type="number" placeholder="e.g. 12" />
+    <label>Priority risks</label>
+    <textarea id="risks" rows="3" placeholder="e.g. sepsis watch, falls, delirium"></textarea>
+    <button onclick="generateHandover()">Generate handover</button>
+    <pre id="handoverOut"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Shift Checklist Builder</h2>
+    <label>Shift type</label>
+    <input id="shiftType" placeholder="e.g. Day shift" />
+    <label>Top 3 priorities</label>
+    <textarea id="priorities" rows="3" placeholder="e.g. obs, meds, discharges"></textarea>
+    <button onclick="generateChecklist()">Generate checklist</button>
+    <pre id="checklistOut"></pre>
+  </div>
+
+  <script>
+    function generateHandover() {
+      const ward = document.getElementById('ward').value || 'Ward not set';
+      const patients = document.getElementById('patients').value || '?';
+      const risks = document.getElementById('risks').value || 'None stated';
+
+      const txt = `HANDOVER — ${ward}\n` +
+        `Patient count: ${patients}\n\n` +
+        `1) Situation\n- Current workload summary\n\n` +
+        `2) High-risk patients / issues\n- ${risks}\n\n` +
+        `3) Outstanding tasks\n- [ ] Time-critical meds\n- [ ] Escalations / reviews\n- [ ] Results to chase\n\n` +
+        `4) Safety focus for next team\n- Sepsis / falls / deterioration checks\n\n` +
+        `5) Staffing / flow notes\n- Any shortages, bed pressures, delays`;
+
+      document.getElementById('handoverOut').textContent = txt;
+    }
+
+    function generateChecklist() {
+      const shiftType = document.getElementById('shiftType').value || 'Shift';
+      const priorities = (document.getElementById('priorities').value || '').split(',').map(s => s.trim()).filter(Boolean);
+      const top = priorities.length ? priorities : ['Obs due', 'Meds due', 'Escalations'];
+
+      const lines = [
+        `${shiftType.toUpperCase()} CHECKLIST`,
+        '',
+        '[ ] Safety huddle complete',
+        '[ ] Worklist reviewed',
+        ...top.map(p => `[ ] Priority: ${p}`),
+        '[ ] Documentation up to date',
+        '[ ] Handover prep started (last 60 mins)'
+      ];
+
+      document.getElementById('checklistOut').textContent = lines.join('\n');
+    }
+  </script>
+</body>
+</html>
