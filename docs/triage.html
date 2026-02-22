@@ -63,7 +63,18 @@ else{pts=-(20+Math.abs(under)*15+(p.sev===1?20:0));st.score=Math.max(0,st.score+
 st.nurses=Math.max(0,st.nurses-1); st.docs=Math.max(0,st.docs-(choice==='Immediate'?1:0)); st.beds=Math.max(0,st.beds-1); if(needsResus)st.resus=Math.max(0,st.resus-1);
 setTimeout(()=>{st.nurses=Math.min(3,st.nurses+1); st.docs=Math.min(2,st.docs+1); st.beds=Math.min(6,st.beds+1); if(needsResus)st.resus=Math.min(2,st.resus+1); render();},2000);
 st.seen++; st.queue.splice(i,1); render();}
-function render(){if(!st)return;['time','score','lives','qcount','seen','nurses','docs','beds','resus','inc'].forEach(id=>document.getElementById(id).textContent=id==='time'?fmt(st.time):st[id==='qcount'?'queue':id].length??st[id]);
+function render(){
+if(!st) return;
+document.getElementById('time').textContent=fmt(st.time);
+document.getElementById('score').textContent=st.score;
+document.getElementById('lives').textContent=st.lives;
+document.getElementById('qcount').textContent=st.queue.length;
+document.getElementById('seen').textContent=st.seen;
+document.getElementById('nurses').textContent=st.nurses;
+document.getElementById('docs').textContent=st.docs;
+document.getElementById('beds').textContent=st.beds;
+document.getElementById('resus').textContent=st.resus;
+document.getElementById('inc').textContent=st.incidents;
 document.getElementById('pauseBtn').textContent=st.paused?'Resume':'Pause';
 const q=document.getElementById('queue');q.innerHTML='';const arr=[...st.queue].sort((a,b)=>(b.sev+b.deter*.5)-(a.sev+a.deter*.5));
 arr.forEach(p=>{const d=document.createElement('div');d.className='p';d.innerHTML=`<h3>${p.t}</h3><div class='muted'>${p.name} — ${p.d}</div><div class='badges'><span class='b'>Severity ${p.sev}</span><span class='b'>Wait ${p.wait}s</span><span class='b'>Deter ${p.deter}</span></div><div class='controls'>${LEVELS.map(l=>`<button onclick="triage(${p.id},'${l}')">${l}</button>`).join('')}</div>`;q.appendChild(d);});
