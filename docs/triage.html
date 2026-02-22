@@ -3,104 +3,189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Triage Trainer v1</title>
+  <title>Triage Shift Simulator v2</title>
   <style>
-    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;--accent:#3b82f6;--ok:#10b981;--bad:#ef4444}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1226,#0f172a);color:var(--text)}
-    .wrap{max-width:900px;margin:0 auto;padding:16px}
-    .card{background:rgba(255,255,255,.04);border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}
-    h1{margin:0 0 8px}.muted{color:var(--muted)}
-    button{padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0b1222;color:var(--text);cursor:pointer}
-    .primary{background:linear-gradient(90deg,#2563eb,#4f46e5);border:none}
-    .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-    .opt{padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1222}
-    .ok{border-color:var(--ok)} .bad{border-color:var(--bad)}
-    .row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    .pill{font-size:12px;border:1px solid #334155;border-radius:999px;padding:4px 8px;color:var(--muted)}
-    @media(max-width:700px){.opts{grid-template-columns:1fr}}
+    :root{--bg:#0b1220;--panel:#111a2d;--card:#17233d;--text:#e6ecff;--muted:#9fb0d1;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#4f8cff}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0a1020,#0c1730);color:var(--text);font-family:Inter,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:14px}
+    h1{margin:0 0 6px}.muted{color:var(--muted)}
+    .top{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+    .hud{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
+    .stat{background:var(--panel);border:1px solid #2c3a5f;border-radius:10px;padding:8px}
+    .k{font-size:12px;color:var(--muted)} .v{font-size:20px;font-weight:700}
+    .grid{display:grid;grid-template-columns:1.2fr .9fr;gap:10px}
+    .panel{background:var(--panel);border:1px solid #2c3a5f;border-radius:12px;padding:10px;min-height:360px}
+    .queue{display:grid;gap:8px;max-height:520px;overflow:auto}
+    .p{background:var(--card);border:1px solid #32456f;border-radius:10px;padding:8px}
+    .p h3{margin:0 0 4px;font-size:16px}
+    .badges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+    .b{font-size:11px;border:1px solid #3a4e79;color:var(--muted);padding:2px 7px;border-radius:999px}
+    .sev-1{color:#fecaca;border-color:#7f1d1d;background:#450a0a66}
+    .sev-2{color:#fde68a;border-color:#854d0e;background:#451a0366}
+    .sev-3{color:#bbf7d0;border-color:#166534;background:#052e1666}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    button{padding:8px 10px;border-radius:8px;border:1px solid #3a4e79;background:#0d1830;color:var(--text);cursor:pointer}
+    button.primary{background:linear-gradient(90deg,#2b6ef3,#5a45ea);border:none}
+    .log{max-height:460px;overflow:auto;display:grid;gap:6px}
+    .event{font-size:13px;background:#0d1830;border:1px solid #2b3f68;border-radius:8px;padding:7px}
+    .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .footer{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    @media(max-width:980px){.hud{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Triage Trainer (v1)</h1>
-  <p class="muted">Educational scenarios only — not for live clinical decisions.</p>
-
-  <div class="card row">
+  <div class="top">
     <div>
-      <span class="pill">Score: <b id="score">0</b></span>
-      <span class="pill">Question: <b id="qnum">1</b>/10</span>
-      <span class="pill">Streak: <b id="streak">0</b></span>
+      <h1>Triage Shift Simulator v2</h1>
+      <div class="muted">Educational simulation only — not for live clinical decisions.</div>
     </div>
-    <div>
-      <button onclick="resetGame()">Reset</button>
-      <button class="primary" onclick="nextQuestion()">Next</button>
+    <div class="footer">
+      <button onclick="newGame()">New Shift</button>
+      <button onclick="togglePause()" id="pauseBtn">Pause</button>
     </div>
   </div>
 
-  <div class="card">
-    <h3 id="title">Scenario</h3>
-    <p id="scenario"></p>
-    <div class="opts" id="options"></div>
-    <div id="feedback" class="card" style="display:none"></div>
+  <div class="hud">
+    <div class="stat"><div class="k">Time</div><div class="v" id="time">00:00</div></div>
+    <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+    <div class="stat"><div class="k">Lives</div><div class="v" id="lives">3</div></div>
+    <div class="stat"><div class="k">Queue</div><div class="v" id="qcount">0</div></div>
+    <div class="stat"><div class="k">Seen</div><div class="v" id="seen">0</div></div>
+    <div class="stat"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2 style="margin:0 0 8px">Waiting Room</h2>
+      <div id="queue" class="queue"></div>
+    </div>
+    <div class="panel">
+      <h2 style="margin:0 0 8px">Shift Log</h2>
+      <div id="log" class="log"></div>
+    </div>
   </div>
 </div>
 
 <script>
-const levels=['Immediate (Resus)','Very Urgent','Urgent','Standard','Non-Urgent'];
-const questions=[
-  {t:'Chest Pain + Shock',s:'56M, severe central chest pain, clammy, BP 82/50, HR 132, sats 90% RA.',a:'Immediate (Resus)',r:'Haemodynamic instability + possible ACS/shock.'},
-  {t:'Minor Laceration',s:'24F, 2cm finger cut, bleeding controlled, vitals normal, pain mild.',a:'Standard',r:'Stable, minor injury.'},
-  {t:'Anaphylaxis',s:'33M after antibiotic, wheeze, lip swelling, hypotension, stridor.',a:'Immediate (Resus)',r:'Airway/breathing/circulation compromise.'},
-  {t:'Abdo Pain stable',s:'40F, lower abdominal pain 7/10, afebrile, stable obs, no peritonism.',a:'Urgent',r:'Needs prompt assessment but currently stable.'},
-  {t:'Severe Asthma',s:'19F, speaking single words, RR 34, sats 88% RA, accessory muscle use.',a:'Immediate (Resus)',r:'Life-threatening respiratory distress.'},
-  {t:'Simple UTI symptoms',s:'30F dysuria/frequency, no flank pain/fever, obs normal.',a:'Non-Urgent',r:'Low acuity presentation.'},
-  {t:'Possible Stroke',s:'72M sudden unilateral weakness + slurred speech, onset 40 mins ago.',a:'Very Urgent',r:'Time-critical stroke pathway.'},
-  {t:'Head injury anticoagulated',s:'78F fall, head strike, on apixaban, GCS 15, mild headache.',a:'Urgent',r:'Higher risk due to anticoagulation/head injury.'},
-  {t:'Sepsis concern',s:'67M fever, confusion, HR 124, BP 95/60, RR 28.',a:'Very Urgent',r:'Likely sepsis with physiological derangement.'},
-  {t:'Ankle sprain walking',s:'21M twisted ankle, weight-bearing with pain, no deformity, obs normal.',a:'Standard',r:'Moderate acuity musculoskeletal injury.'}
+const NAMES=['Alex','Sam','Jordan','Taylor','Casey','Riley','Morgan','Jamie','Chris','Avery'];
+const SCENARIOS=[
+  {title:'Chest pain + hypotension',desc:'Severe central chest pain, clammy, low BP.',truth:'Immediate',sev:1},
+  {title:'Anaphylaxis signs',desc:'Wheeze, lip swelling, hypotension after drug.',truth:'Immediate',sev:1},
+  {title:'Stroke symptoms',desc:'Sudden unilateral weakness + slurred speech.',truth:'Very Urgent',sev:1},
+  {title:'Sepsis concern',desc:'Fever, confusion, tachycardia, low BP.',truth:'Very Urgent',sev:1},
+  {title:'Head injury on anticoagulant',desc:'Fall + head strike, currently stable.',truth:'Urgent',sev:2},
+  {title:'Abdo pain stable',desc:'Pain 7/10, stable observations.',truth:'Urgent',sev:2},
+  {title:'Minor laceration',desc:'Small cut, bleeding controlled, normal obs.',truth:'Standard',sev:3},
+  {title:'UTI symptoms mild',desc:'Dysuria/frequency, obs normal.',truth:'Non-Urgent',sev:3},
+  {title:'Ankle sprain weight-bearing',desc:'Painful but mobilising, no deformity.',truth:'Standard',sev:3}
 ];
-let i=0, score=0, streak=0, answered=false;
+const LEVELS=['Immediate','Very Urgent','Urgent','Standard','Non-Urgent'];
+let state;
 
-function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5)}
-function render(){
-  const q=questions[i];
-  document.getElementById('qnum').textContent=i+1;
-  document.getElementById('score').textContent=score;
-  document.getElementById('streak').textContent=streak;
-  document.getElementById('title').textContent=q.t;
-  document.getElementById('scenario').textContent=q.s;
-  const opts=shuffle(levels);
-  const box=document.getElementById('options'); box.innerHTML='';
-  opts.forEach(o=>{
-    const b=document.createElement('button'); b.className='opt'; b.textContent=o;
-    b.onclick=()=>answer(o,b);
-    box.appendChild(b);
+function rand(a){return a[Math.floor(Math.random()*a.length)]}
+function fmt(sec){const m=String(Math.floor(sec/60)).padStart(2,'0');const s=String(sec%60).padStart(2,'0');return `${m}:${s}`}
+
+function newGame(){
+  state={time:0,score:0,lives:3,seen:0,streak:0,queue:[],nextSpawn:3,paused:false,ended:false};
+  log('Shift started. Triage safely and prioritise deterioration.','ok');
+  render();
+}
+
+function spawn(){
+  const sc=JSON.parse(JSON.stringify(rand(SCENARIOS)));
+  const id=Date.now()+Math.floor(Math.random()*9999);
+  const p={id,name:rand(NAMES),age:Math.floor(Math.random()*70)+18,wait:0,deterioration:0,...sc};
+  state.queue.push(p);
+}
+
+function tick(){
+  if(!state||state.paused||state.ended) return;
+  state.time++;
+  state.nextSpawn--;
+  if(state.nextSpawn<=0){spawn();state.nextSpawn=Math.max(2,7-Math.floor(state.time/45));}
+
+  state.queue.forEach(p=>{
+    p.wait++;
+    if(p.sev===1 && p.wait>25) p.deterioration+=2;
+    else if(p.sev===2 && p.wait>40) p.deterioration+=1;
+    else if(p.wait>70) p.deterioration+=1;
+
+    if(p.deterioration>=6){
+      state.lives--;
+      log(`Patient deteriorated in queue: ${p.title} (${p.name})`,'bad');
+      p.deterioration=0; p.wait=0; // reset after event
+    }
   });
-  const fb=document.getElementById('feedback'); fb.style.display='none'; fb.innerHTML='';
-  answered=false;
-}
-function answer(choice,btn){
-  if(answered) return; answered=true;
-  const q=questions[i];
-  const correct=choice===q.a;
-  const fb=document.getElementById('feedback');
-  fb.style.display='block';
-  if(correct){score++; streak++; btn.classList.add('ok'); fb.innerHTML=`✅ Correct. <br><br><b>Why:</b> ${q.r}`;}
-  else {streak=0; btn.classList.add('bad'); fb.innerHTML=`❌ Not quite. Correct answer: <b>${q.a}</b><br><br><b>Why:</b> ${q.r}`;}
-  document.getElementById('score').textContent=score;
-  document.getElementById('streak').textContent=streak;
-}
-function nextQuestion(){
-  if(i<questions.length-1){i++; render();}
-  else {
-    document.getElementById('title').textContent='Session complete';
-    document.getElementById('scenario').textContent=`Final score: ${score}/${questions.length}`;
-    document.getElementById('options').innerHTML='';
-    const fb=document.getElementById('feedback'); fb.style.display='block'; fb.innerHTML='Great work. Reset to play again.';
+
+  if(state.lives<=0){
+    state.ended=true;
+    log('Shift ended: safety threshold reached.','bad');
   }
+
+  render();
 }
-function resetGame(){i=0;score=0;streak=0;render();}
-render();
+
+function triage(id,chosen){
+  if(state.ended) return;
+  const idx=state.queue.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=state.queue[idx];
+  const correct=p.truth===chosen;
+  let delta=0;
+  if(correct){
+    delta=30 + Math.max(0,20-p.wait) + (p.sev===1?20:0);
+    state.streak++;
+    log(`✔ Correct triage: ${p.title} → ${chosen}`,'ok');
+  } else {
+    const dist=Math.abs(LEVELS.indexOf(p.truth)-LEVELS.indexOf(chosen));
+    delta=-(20+dist*15+(p.sev===1?20:0));
+    state.streak=0;
+    if(p.sev===1 && LEVELS.indexOf(chosen)>1){state.lives--;log(`✖ Critical under-triage: ${p.title} picked ${chosen}`,'bad');}
+    else log(`✖ Not ideal: ${p.title} should be ${p.truth}, picked ${chosen}`,'warn');
+  }
+  state.score=Math.max(0,state.score+delta);
+  state.seen++;
+  state.queue.splice(idx,1);
+  render();
+}
+
+function render(){
+  document.getElementById('time').textContent=fmt(state.time);
+  document.getElementById('score').textContent=state.score;
+  document.getElementById('lives').textContent=state.lives;
+  document.getElementById('qcount').textContent=state.queue.length;
+  document.getElementById('seen').textContent=state.seen;
+  document.getElementById('streak').textContent=state.streak;
+  document.getElementById('pauseBtn').textContent=state.paused?'Resume':'Pause';
+
+  const q=document.getElementById('queue'); q.innerHTML='';
+  const sorted=[...state.queue].sort((a,b)=>(b.sev+b.deterioration*0.5)-(a.sev+a.deterioration*0.5));
+  sorted.forEach(p=>{
+    const d=document.createElement('div'); d.className='p';
+    d.innerHTML=`<h3>${p.title}</h3>
+      <div class='muted'>${p.name}, ${p.age}y — ${p.desc}</div>
+      <div class='badges'>
+        <span class='b sev-${p.sev}'>Severity ${p.sev}</span>
+        <span class='b'>Wait ${p.wait}s</span>
+        <span class='b ${p.deterioration>=4?'sev-1':''}'>Deterioration ${p.deterioration}</span>
+      </div>
+      <div class='controls'>
+        <button onclick="triage(${p.id},'Immediate')">Immediate</button>
+        <button onclick="triage(${p.id},'Very Urgent')">Very Urgent</button>
+        <button onclick="triage(${p.id},'Urgent')">Urgent</button>
+        <button onclick="triage(${p.id},'Standard')">Standard</button>
+        <button onclick="triage(${p.id},'Non-Urgent')">Non-Urgent</button>
+      </div>`;
+    q.appendChild(d);
+  });
+  if(!sorted.length) q.innerHTML="<div class='muted'>No patients waiting yet...</div>";
+}
+
+function log(text,type=''){const box=document.getElementById('log');const d=document.createElement('div');d.className='event '+type;d.textContent=`[${fmt(state?state.time:0)}] ${text}`;box.prepend(d);}
+function togglePause(){if(!state) return; state.paused=!state.paused; render();}
+
+newGame();
+setInterval(tick,1000);
 </script>
 </body>
 </html>
