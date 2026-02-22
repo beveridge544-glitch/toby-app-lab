@@ -35,7 +35,7 @@
         <div class="small">Local reference library + chatbot helper. Verify with local policy / BNF / Medusa.</div>
       </div>
       <div>
-        <span class="pill">Build: 2026-02-22 18:35 UTC</span>
+        <span class="pill">Build: 2026-02-22 18:45 UTC</span>
         <span class="pill">Safety-first</span>
       </div>
     </div>
@@ -69,8 +69,16 @@
           <div class="small">Track what has been checked against BNF/local policy.</div>
           <div class="row" style="margin-top:8px">
             <button onclick="openBnf()">Open BNF for selected med</button>
+            <button onclick="openMedusa()">Open Medusa</button>
             <button class="primary" onclick="markVerified()">Mark verified today</button>
           </div>
+          <label style="margin-top:8px">Verification source</label>
+          <select id="verifySource">
+            <option value="BNF">BNF</option>
+            <option value="Medusa">Medusa</option>
+            <option value="Local policy">Local policy</option>
+            <option value="BNF + Medusa + Local policy" selected>BNF + Medusa + Local policy</option>
+          </select>
           <pre id="verifyOut"></pre>
         </div>
       </div>
@@ -214,10 +222,16 @@ function openBnf(){
   const q=encodeURIComponent(med+' BNF NICE');
   window.open('https://bnf.nice.org.uk/search/?q='+q,'_blank');
 }
+function openMedusa(){
+  const med=selectedMed();
+  const q=encodeURIComponent(med);
+  window.open('https://imgmedusa.nhs.uk/search?q='+q,'_blank');
+}
 function markVerified(){
   const med=selectedMed();
   const v=loadVerify();
-  v[med]={date:new Date().toISOString().slice(0,10), by:'Oliver/Toby', source:'BNF + local policy'};
+  const src=document.getElementById('verifySource')?.value||'BNF + Medusa + Local policy';
+  v[med]={date:new Date().toISOString().slice(0,10), by:'Oliver/Toby', source:src};
   saveVerify(v);
   renderVerify();
 }
