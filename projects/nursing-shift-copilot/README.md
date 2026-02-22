@@ -1,10 +1,11 @@
-# Medication Assistant (MVP-lite v0.5)
+# Medication Assistant (MVP-lite v0.6)
 
 ## What it does
-- Generates practical **How to Prepare** steps (route-structured)
-- Generates practical **How to Administer** flow (route-structured)
-- Generates side effects + red flags brief
-- Generates documentation template
+- Medication dropdown + searchable medication list
+- Practical **How to Prepare** steps (route-structured)
+- Practical **How to Administer** flow (route-structured)
+- Side effects + red flags brief
+- Documentation template
 
 ## Safety
 Decision-support only. Always verify against local policy, BNF, and Medusa before administration.

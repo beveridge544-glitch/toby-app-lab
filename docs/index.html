@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Medication Assistant MVP v0.5</title>
+  <title>Medication Assistant MVP v0.6</title>
   <style>
     :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --warn:#ffb86b; }
     *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#121a33);color:var(--text)}
@@ -18,13 +18,19 @@
 </head>
 <body>
   <div class="wrap">
-    <h1>Medication Assistant (MVP-lite v0.5)</h1>
-    <p>Now includes practical <b>How to Prepare</b> and <b>How to Administer</b> sections with route-specific structure.</p>
+    <h1>Medication Assistant (MVP-lite v0.6)</h1>
+    <p>Added medication selector + searchable list. Custom medication still supported.</p>
     <p class="small warning">Decision-support only. Always verify against local policy, BNF, and Medusa before administration.</p>
 
     <div class="card">
-      <label>Medication</label>
-      <input id="med" placeholder="e.g. Co-amoxiclav" />
+      <label>Medication (dropdown)</label>
+      <select id="medSelect" onchange="syncMedication()">
+        <option value="">Choose medication...</option>
+      </select>
+
+      <label>Or type medication manually</label>
+      <input id="med" list="medList" placeholder="e.g. Co-amoxiclav" />
+      <datalist id="medList"></datalist>
 
       <label>Route</label>
       <select id="route">
@@ -76,11 +82,37 @@
       <h2>Documentation helper</h2>
       <button class="primary" onclick="genDoc()">Generate note template</button>
       <pre id="docOut"></pre>
-      <p class="small">Build stamp: 2026-02-22 14:05 UTC</p>
+      <p class="small">Build stamp: 2026-02-22 14:15 UTC</p>
     </div>
   </div>
 
   <script>
+    const meds = [
+      'Paracetamol','Ibuprofen','Codeine','Morphine','Oxycodone','Tramadol','Fentanyl',
+      'Ondansetron','Cyclizine','Metoclopramide','Prochlorperazine',
+      'Amoxicillin','Co-amoxiclav','Piperacillin/tazobactam','Gentamicin','Vancomycin','Clarithromycin','Doxycycline','Nitrofurantoin',
+      'Salbutamol','Ipratropium','Hydrocortisone','Prednisolone','Dexamethasone',
+      'Insulin (rapid-acting)','Insulin (long-acting)','Metformin',
+      'Enoxaparin','Warfarin','Apixaban','Rivaroxaban',
+      'Amlodipine','Ramipril','Bisoprolol','Furosemide','GTN spray',
+      'Omeprazole','Lansoprazole','Lactulose',
+      'Diazepam','Lorazepam','Haloperidol'
+    ];
+
+    function initMedicationLists(){
+      const select=document.getElementById('medSelect');
+      const list=document.getElementById('medList');
+      meds.forEach(m=>{
+        const o=document.createElement('option'); o.value=m; o.textContent=m; select.appendChild(o);
+        const d=document.createElement('option'); d.value=m; list.appendChild(d);
+      });
+    }
+
+    function syncMedication(){
+      const m=document.getElementById('medSelect').value;
+      if(m) document.getElementById('med').value=m;
+    }
+
     const v=(id,f='Not specified')=>document.getElementById(id).value?.trim()||f;
 
     function routePrepLines(route){
@@ -181,6 +213,8 @@
 
     async function copyText(id){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); await navigator.clipboard.writeText(t); alert('Copied ✅'); }
     function downloadText(id,name){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); const b=new Blob([t],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
+
+    initMedicationLists();
   </script>
 </body>
 </html>
