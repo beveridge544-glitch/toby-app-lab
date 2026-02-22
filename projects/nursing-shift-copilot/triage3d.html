@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Triage Prototype v0.1</title>
+  <style>
+    html,body{margin:0;height:100%;overflow:hidden;background:#0b1020;color:#e6ecff;font-family:Inter,Arial,sans-serif}
+    #ui{position:fixed;top:12px;left:12px;z-index:10;background:rgba(10,16,32,.78);border:1px solid #334155;border-radius:12px;padding:10px;min-width:260px}
+    #ui h3{margin:0 0 8px;font-size:16px}
+    #ui .muted{color:#9fb0d1;font-size:12px}
+    #info{margin-top:8px;font-size:13px;line-height:1.4}
+    button{margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid #3a4e79;background:#0d1830;color:#e6ecff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div id="ui">
+    <h3>3D Triage Prototype v0.1</h3>
+    <div class="muted">Click a patient sphere to triage to zone.</div>
+    <div id="info">Selected: none</div>
+    <button id="toResus">Assign: Resus</button>
+    <button id="toUrgent">Assign: Urgent Care</button>
+    <button id="toStandard">Assign: Standard</button>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.161.0/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.161.0/examples/jsm/controls/OrbitControls.js';
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b1020);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 28, 36);
+
+    const renderer = new THREE.WebGLRenderer({ antialias:true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0,0,0);
+    controls.update();
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 1.2));
+    const d = new THREE.DirectionalLight(0xffffff, 1.0); d.position.set(15,20,10); scene.add(d);
+
+    // Floor
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(60, 40),
+      new THREE.MeshStandardMaterial({ color:0x1f2937, roughness:.9, metalness:.1 })
+    );
+    floor.rotation.x = -Math.PI/2;
+    scene.add(floor);
+
+    // Zones
+    const zones = {
+      resus: { pos:new THREE.Vector3(-18,0.02,-8), color:0x7f1d1d, name:'Resus' },
+      urgent:{ pos:new THREE.Vector3(0,0.02,-8), color:0x854d0e, name:'Urgent Care' },
+      standard:{ pos:new THREE.Vector3(18,0.02,-8), color:0x166534, name:'Standard' },
+      waiting:{ pos:new THREE.Vector3(0,0.02,10), color:0x1e3a8a, name:'Waiting' }
+    };
+
+    Object.values(zones).forEach(z=>{
+      const m = new THREE.Mesh(
+        new THREE.BoxGeometry(14,0.05,10),
+        new THREE.MeshStandardMaterial({ color:z.color })
+      );
+      m.position.copy(z.pos);
+      scene.add(m);
+    });
+
+    function createPatient(id, severity){
+      const colors = {1:0xef4444,2:0xf59e0b,3:0x60a5fa};
+      const mesh = new THREE.Mesh(
+        new THREE.SphereGeometry(0.9, 24, 24),
+        new THREE.MeshStandardMaterial({ color:colors[severity] || 0x60a5fa })
+      );
+      mesh.position.set((Math.random()*10)-5, 0.9, 10 + (Math.random()*4-2));
+      mesh.userData = { id, severity, target: mesh.position.clone(), zone:'waiting' };
+      scene.add(mesh);
+      return mesh;
+    }
+
+    const patients = [
+      createPatient('P-101',1),
+      createPatient('P-102',2),
+      createPatient('P-103',3),
+      createPatient('P-104',2),
+      createPatient('P-105',1)
+    ];
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let selected = null;
+    const info = document.getElementById('info');
+
+    function selectPatient(p){
+      selected = p;
+      if(!p){ info.textContent='Selected: none'; return; }
+      info.textContent = `Selected: ${p.userData.id} | Severity ${p.userData.severity} | Zone ${p.userData.zone}`;
+    }
+
+    window.addEventListener('pointerdown', (e)=>{
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(patients);
+      if(hits.length) selectPatient(hits[0].object);
+    });
+
+    function assign(zoneKey){
+      if(!selected) return;
+      const z = zones[zoneKey];
+      selected.userData.target = new THREE.Vector3(
+        z.pos.x + (Math.random()*6-3),
+        0.9,
+        z.pos.z + (Math.random()*3-1.5)
+      );
+      selected.userData.zone = z.name;
+      selectPatient(selected);
+    }
+
+    document.getElementById('toResus').onclick = ()=>assign('resus');
+    document.getElementById('toUrgent').onclick = ()=>assign('urgent');
+    document.getElementById('toStandard').onclick = ()=>assign('standard');
+
+    function animate(){
+      requestAnimationFrame(animate);
+      patients.forEach(p=>{
+        p.position.lerp(p.userData.target, 0.03);
+      });
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', ()=>{
+      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
