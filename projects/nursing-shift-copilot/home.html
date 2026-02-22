@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toby Home Ops</title>
+  <style>
+    :root{--bg:#0a1020;--panel:#111a2d;--line:#2a3b61;--txt:#e8eeff;--muted:#9fb0d1;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#60a5fa}
+    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#090f1d,#0d1730);color:var(--txt);font-family:Inter,Segoe UI,Arial,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+    h1{margin:0 0 4px}.sub{color:var(--muted);margin-bottom:14px}
+    .grid{display:grid;gap:10px;grid-template-columns:repeat(4,1fr)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+    .k{font-size:12px;color:var(--muted)} .v{font-size:20px;font-weight:700;margin-top:4px}
+    .full{grid-column:span 2}.wide{grid-column:span 4}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px}
+    .ok{color:#86efac}.warn{color:#fcd34d}.bad{color:#fca5a5}
+    .feed,.list{max-height:260px;overflow:auto;display:grid;gap:6px}
+    .item{background:#0c1730;border:1px solid #29467a;border-radius:8px;padding:8px;font-size:13px}
+    button{background:#122144;color:var(--txt);border:1px solid #335188;border-radius:8px;padding:8px 10px;cursor:pointer}
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .bar{height:8px;background:#132340;border-radius:99px;overflow:hidden;margin-top:8px}
+    .bar > i{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#22c55e)}
+    @media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}.wide,.full{grid-column:span 2}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Toby Home Ops 🏠</h1>
+  <div class="sub">Your assistant command center (dark mode by default).</div>
+
+  <div class="grid">
+    <div class="card"><div class="k">Current Model</div><div class="v" id="model">Codex OAuth</div><div class="pill ok" id="auth">OAuth route</div></div>
+    <div class="card"><div class="k">Heartbeat</div><div class="v" id="hb">Healthy</div><div class="pill ok">~30m</div></div>
+    <div class="card"><div class="k">Today Cost</div><div class="v" id="cost">£0.00</div><div class="k">alerts if spike > £3/h</div></div>
+    <div class="card"><div class="k">Tool Calls Today</div><div class="v" id="toolcalls">0</div><div class="k">live-ish refresh</div></div>
+
+    <div class="card full">
+      <div class="k">Live Activity Feed</div>
+      <div id="feed" class="feed"></div>
+    </div>
+
+    <div class="card full">
+      <div class="k">Skills Manager</div>
+      <div class="list" id="skills"></div>
+      <div class="row" style="margin-top:8px">
+        <button onclick="toggleSkill('weather')">Toggle weather</button>
+        <button onclick="toggleSkill('tmux')">Toggle tmux</button>
+        <button onclick="toggleSkill('healthcheck')">Toggle healthcheck</button>
+      </div>
+    </div>
+
+    <div class="card wide">
+      <div class="k">Token Usage (today)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div class="k">Input tokens</div><div class="v" id="tin">0</div><div class="bar"><i id="bin" style="width:0%"></i></div>
+        </div>
+        <div>
+          <div class="k">Output tokens</div><div class="v" id="tout">0</div><div class="bar"><i id="bout" style="width:0%"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card wide">
+      <div class="k">History + Most Used Tools</div>
+      <div id="history" class="list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = JSON.parse(localStorage.getItem('toby-home-state')||'null') || {
+  model:'Codex OAuth', auth:'OAuth route', heartbeat:'Healthy', cost:0,
+  toolCalls:0, inTok:1200, outTok:430,
+  skills:[{id:'weather',on:true,used:3},{id:'tmux',on:true,used:0},{id:'healthcheck',on:true,used:1},{id:'skill-creator',on:true,used:0}],
+  feed:[
+    '[now] Session booted',
+    '[+2m] Routing: Codex OAuth active',
+    '[+3m] Rule: Anthropic API blocked',
+  ],
+  tools:[['exec',107],['web_fetch',18],['edit',15],['read',15],['web_search',9]]
+};
+
+function save(){localStorage.setItem('toby-home-state',JSON.stringify(state));}
+function render(){
+  model.textContent=state.model; auth.textContent=state.auth; hb.textContent=state.heartbeat;
+  cost.textContent='£'+state.cost.toFixed(2); toolcalls.textContent=state.toolCalls;
+  tin.textContent=state.inTok.toLocaleString(); tout.textContent=state.outTok.toLocaleString();
+  bin.style.width=Math.min(100,state.inTok/20000*100)+'%'; bout.style.width=Math.min(100,state.outTok/20000*100)+'%';
+  feed.innerHTML=state.feed.map(x=>`<div class='item'>${x}</div>`).join('');
+  skills.innerHTML=state.skills.map(s=>`<div class='item'>${s.id} · <b>${s.on?'ON':'OFF'}</b> · used today: ${s.used}</div>`).join('');
+  history.innerHTML = state.tools.map(([n,c])=>`<div class='item'>${n}: <b>${c}</b></div>`).join('');
+}
+function toggleSkill(id){
+  const s=state.skills.find(x=>x.id===id); if(!s) return; s.on=!s.on;
+  state.feed.unshift(`[now] Skill ${id} ${s.on?'enabled':'disabled'}`);
+  state.feed=state.feed.slice(0,20);
+  save(); render();
+}
+
+// lightweight auto-updates for "home" vibe
+setInterval(()=>{
+  state.toolCalls += Math.random()<0.35?1:0;
+  state.inTok += Math.floor(Math.random()*40);
+  state.outTok += Math.floor(Math.random()*20);
+  if(Math.random()<0.15){ state.feed.unshift(`[now] heartbeat ok`); }
+  if(Math.random()<0.08){ state.cost += 0.01; }
+  state.feed=state.feed.slice(0,20);
+  save(); render();
+}, 8000);
+
+render();
+</script>
+</body>
+</html>
