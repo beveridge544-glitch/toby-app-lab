@@ -102,10 +102,19 @@ function toggleSkill(id){
   save(); render();
 }
 
-function manualRefreshTokens(){
-  state.inTok += Math.floor(Math.random()*80) + 20;
-  state.outTok += Math.floor(Math.random()*40) + 10;
-  state.feed.unshift('[now] Manual token refresh completed');
+async function manualRefreshTokens(){
+  try {
+    const r = await fetch('/token-stats.json?ts=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('fetch failed: ' + r.status);
+    const d = await r.json();
+    if (typeof d.inputTokens === 'number') state.inTok = d.inputTokens;
+    if (typeof d.outputTokens === 'number') state.outTok = d.outputTokens;
+    if (typeof d.toolCalls === 'number') state.toolCalls = d.toolCalls;
+    if (typeof d.costGbp === 'number') state.cost = d.costGbp;
+    state.feed.unshift(`[now] Token stats refreshed from direct data source (${d.source || 'json'})`);
+  } catch (e) {
+    state.feed.unshift('[now] Token refresh failed (data file unavailable)');
+  }
   state.feed = state.feed.slice(0,20);
   save();
   render();

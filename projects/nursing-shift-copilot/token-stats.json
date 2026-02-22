@@ -1,0 +1,8 @@
+{
+  "source": "gateway-log-export",
+  "updatedAt": "2026-02-22T23:05:00Z",
+  "inputTokens": 2590,
+  "outputTokens": 103,
+  "toolCalls": 0,
+  "costGbp": 0
+}
