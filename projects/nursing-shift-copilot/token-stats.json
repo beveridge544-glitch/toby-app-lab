@@ -1,8 +1,8 @@
 {
-  "source": "gateway-log-export",
-  "updatedAt": "2026-02-22T23:05:00Z",
-  "inputTokens": 2590,
-  "outputTokens": 103,
+  "source": "openclaw-sessions-json",
+  "updatedAt": "2026-02-22T23:07:15Z",
+  "inputTokens": 1946,
+  "outputTokens": 866,
   "toolCalls": 0,
-  "costGbp": 0
+  "costGbp": 0.0
 }
