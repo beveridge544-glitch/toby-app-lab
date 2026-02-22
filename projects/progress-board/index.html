@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toby Progress Board</title>
+  <style>
+    body{margin:0;font-family:Inter,Arial,sans-serif;background:#0f1220;color:#eef2ff}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    h1{margin:0 0 8px}.muted{color:#a9b1c9}
+    .controls{display:grid;grid-template-columns:1fr 140px;gap:8px;margin:14px 0}
+    input,button,select{padding:10px;border-radius:10px;border:1px solid #2a3355;background:#141a2e;color:#eef2ff}
+    button{cursor:pointer;background:linear-gradient(90deg,#5e8bff,#7b67ff);border:none}
+    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .col{background:#12182c;border:1px solid #27304f;border-radius:12px;padding:10px;min-height:320px}
+    .col h2{margin:4px 0 10px;font-size:18px}
+    .card{background:#0e1426;border:1px solid #2a3355;border-radius:10px;padding:10px;margin:8px 0}
+    .row{display:flex;gap:6px;align-items:center;justify-content:space-between}
+    .tiny{font-size:12px;color:#9ba5c3}
+    @media (max-width:900px){.board{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Toby Progress Board</h1>
+  <p class="muted">Live-style board for Oliver: backlog, in progress, done.</p>
+
+  <div class="controls">
+    <input id="newTask" placeholder="Add a task..." />
+    <button onclick="addTask()">Add task</button>
+  </div>
+
+  <div class="board">
+    <div class="col">
+      <h2>Backlog</h2>
+      <div id="backlog"></div>
+    </div>
+    <div class="col">
+      <h2>In Progress</h2>
+      <div id="progress"></div>
+    </div>
+    <div class="col">
+      <h2>Done</h2>
+      <div id="done"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY='toby-progress-board-v1';
+const seed=[
+  {id:1,text:'Expand medication library + route metadata',status:'backlog'},
+  {id:2,text:'Improve mobile UI spacing/buttons',status:'progress'},
+  {id:3,text:'Ship Medication Assistant v0.6',status:'done'},
+  {id:4,text:'Add visible WORKLOG.md with daily updates',status:'done'}
+];
+
+function load(){
+  const raw=localStorage.getItem(KEY);
+  return raw?JSON.parse(raw):seed;
+}
+function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks));}
+function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog';}
+function statusLabel(s){return s==='backlog'?'Backlog':s==='progress'?'In Progress':'Done';}
+
+function render(){
+  const tasks=load();
+  ['backlog','progress','done'].forEach(col=>document.getElementById(col).innerHTML='');
+  tasks.forEach(t=>{
+    const el=document.createElement('div'); el.className='card';
+    el.innerHTML=`<div>${t.text}</div>
+      <div class='row'>
+        <span class='tiny'>${statusLabel(t.status)}</span>
+        <span>
+          <button onclick="move(${t.id})" style='width:auto;padding:6px 8px'>Move</button>
+          <button onclick="delTask(${t.id})" style='width:auto;padding:6px 8px;background:#3a1f2a'>Delete</button>
+        </span>
+      </div>`;
+    document.getElementById(t.status).appendChild(el);
+  });
+}
+
+function addTask(){
+  const i=document.getElementById('newTask');
+  const text=i.value.trim(); if(!text) return;
+  const tasks=load(); tasks.unshift({id:Date.now(),text,status:'backlog'});
+  save(tasks); i.value=''; render();
+}
+function move(id){const tasks=load().map(t=>t.id===id?({...t,status:nextStatus(t.status)}):t); save(tasks); render();}
+function delTask(id){save(load().filter(t=>t.id!==id)); render();}
+
+render();
+</script>
+</body>
+</html>
