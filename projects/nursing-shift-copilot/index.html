@@ -3,218 +3,200 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Medication Assistant MVP v0.6</title>
+  <title>Medication Assistant v0.7</title>
   <style>
-    :root { --bg:#0b1020; --card:#121a33; --muted:#a9b4d0; --text:#ecf1ff; --accent:#6ea8fe; --warn:#ffb86b; }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#121a33);color:var(--text)}
-    .wrap{max-width:1050px;margin:0 auto;padding:20px} .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
-    .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
-    input,textarea,select,button{width:100%;margin-top:6px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#0e1530;color:var(--text)}
-    button{cursor:pointer}.primary{background:linear-gradient(90deg,var(--accent),#8c79ff);border:none}
-    .row{display:flex;gap:8px;margin-top:8px}.row button{flex:1}
-    pre{white-space:pre-wrap;background:#0a1128;border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:8px;min-height:170px}
-    .small{font-size:12px;color:var(--muted)} .warning{color:var(--warn)}
+    :root{--bg:#0f172a;--panel:#111827;--card:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--accent:#60a5fa;--ok:#34d399;--warn:#f59e0b}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1226,#0f172a);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+    h1{margin:0}.small{font-size:12px;color:var(--muted)}
+    .tabs{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+    .tab{padding:8px 12px;border:1px solid #334155;border-radius:999px;background:#0b1222;color:var(--text);cursor:pointer}
+    .tab.active{background:#1d4ed8;border-color:#1d4ed8}
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+    .card{background:rgba(255,255,255,.03);border:1px solid #334155;border-radius:14px;padding:12px}
+    input,select,textarea,button{width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1222;color:var(--text);margin-top:6px}
+    button{cursor:pointer}.primary{background:linear-gradient(90deg,#2563eb,#4f46e5);border:none}
+    .row{display:flex;gap:8px}.row>*{flex:1}
+    pre{white-space:pre-wrap;background:#0b1222;border:1px solid #334155;border-radius:10px;padding:10px;min-height:120px}
+    .hidden{display:none}
+    .chatbox{height:340px;overflow:auto;border:1px solid #334155;border-radius:10px;padding:8px;background:#0b1222}
+    .msg{padding:8px;border-radius:8px;margin:6px 0;line-height:1.35}
+    .u{background:#1e3a8a}.b{background:#1f2937}
+    .pill{display:inline-block;padding:4px 8px;border:1px solid #334155;border-radius:999px;font-size:11px;color:var(--muted);margin-right:6px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Medication Assistant (MVP-lite v0.6)</h1>
-    <p>Added medication selector + searchable list. Custom medication still supported.</p>
-    <p class="small warning">Decision-support only. Always verify against local policy, BNF, and Medusa before administration.</p>
-
-    <div class="card">
-      <label>Medication (dropdown)</label>
-      <select id="medSelect" onchange="syncMedication()">
-        <option value="">Choose medication...</option>
-      </select>
-
-      <label>Or type medication manually</label>
-      <input id="med" list="medList" placeholder="e.g. Co-amoxiclav" />
-      <datalist id="medList"></datalist>
-
-      <label>Route</label>
-      <select id="route">
-        <option>IV infusion</option>
-        <option>IV bolus</option>
-        <option>Oral</option>
-        <option>IM</option>
-        <option>SC</option>
-        <option>Nebulised</option>
-      </select>
-
-      <label>Indication</label>
-      <input id="indication" placeholder="e.g. chest sepsis" />
-
-      <label>Preparation details you know</label>
-      <textarea id="prepKnown" rows="2" placeholder="e.g. vial strength, diluent available, line in situ"></textarea>
-
-      <label>Patient factors</label>
-      <textarea id="factors" rows="2" placeholder="e.g. allergy history, renal function, frailty"></textarea>
-
-      <label>Rate / timing target (if known)</label>
-      <input id="rate" placeholder="e.g. infuse over 30 mins" />
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>How to Prepare</h2>
-        <button class="primary" onclick="genPrepare()">Generate</button>
-        <div class="row"><button onclick="copyText('prepareOut')">Copy</button><button onclick="downloadText('prepareOut','how-to-prepare.txt')">Download</button></div>
-        <pre id="prepareOut"></pre>
+    <div class="header">
+      <div>
+        <h1>Medication Assistant v0.7</h1>
+        <div class="small">Local reference library + chatbot helper. Verify with local policy / BNF / Medusa.</div>
       </div>
-
-      <div class="card">
-        <h2>How to Administer</h2>
-        <button class="primary" onclick="genAdmin()">Generate</button>
-        <div class="row"><button onclick="copyText('adminOut')">Copy</button><button onclick="downloadText('adminOut','how-to-administer.txt')">Download</button></div>
-        <pre id="adminOut"></pre>
-      </div>
-
-      <div class="card">
-        <h2>Side effects & red flags</h2>
-        <button class="primary" onclick="genEffects()">Generate</button>
-        <div class="row"><button onclick="copyText('effectsOut')">Copy</button><button onclick="downloadText('effectsOut','side-effects-redflags.txt')">Download</button></div>
-        <pre id="effectsOut"></pre>
+      <div>
+        <span class="pill">Build: 2026-02-22 18:20 UTC</span>
+        <span class="pill">Safety-first</span>
       </div>
     </div>
 
-    <div class="card" style="margin-top:14px">
-      <h2>Documentation helper</h2>
-      <button class="primary" onclick="genDoc()">Generate note template</button>
-      <pre id="docOut"></pre>
-      <p class="small">Build stamp: 2026-02-22 14:15 UTC</p>
+    <div class="tabs">
+      <button class="tab active" data-tab="library" onclick="showTab('library',this)">Medication Library</button>
+      <button class="tab" data-tab="assistant" onclick="showTab('assistant',this)">Chat Assistant</button>
+      <button class="tab" data-tab="checks" onclick="showTab('checks',this)">Checks & Oxygen</button>
+    </div>
+
+    <div id="library" class="tabview">
+      <div class="grid">
+        <div class="card">
+          <label>Medication</label>
+          <select id="medSelect" onchange="renderMed()"></select>
+          <label>Or search medication</label>
+          <input id="medSearch" placeholder="Type e.g. gentamicin" oninput="searchMed()" />
+          <div class="row">
+            <button class="primary" onclick="renderMed()">Show details</button>
+            <button onclick="copyText('medOut')">Copy</button>
+          </div>
+          <pre id="medOut"></pre>
+        </div>
+        <div class="card">
+          <h3 style="margin:4px 0 8px">Quick frequency notes</h3>
+          <pre id="freqOut"></pre>
+          <h3 style="margin:10px 0 8px">Emergency/important notes</h3>
+          <pre id="quickOut"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div id="assistant" class="tabview hidden">
+      <div class="grid">
+        <div class="card">
+          <div class="chatbox" id="chatbox"></div>
+          <div class="row" style="margin-top:8px">
+            <input id="chatIn" placeholder="Ask: 'How do I prepare gentamicin?'" />
+            <button class="primary" onclick="sendChat()">Send</button>
+          </div>
+          <div class="small" style="margin-top:6px">Assistant is grounded to your local library notes, not open-ended dosing advice.</div>
+        </div>
+        <div class="card">
+          <h3 style="margin:4px 0 8px">Assistant rules</h3>
+          <ul>
+            <li>Uses local med library entries first.</li>
+            <li>If data missing: says “verify in policy/BNF/Medusa”.</li>
+            <li>Never acts as prescriber.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div id="checks" class="tabview hidden">
+      <div class="grid">
+        <div class="card">
+          <h3 style="margin:4px 0 8px">Checks (local notes)</h3>
+          <pre>One person:
+- Paracetamol (oral)
+- Any oral medication
+- Salbutamol 2.5mg/5mg
+- Ipratropium bromide 500mcg
+- TTO nitrofurantoin
+
+Two people:
+- Morphine (oral + IV)
+- Codeine 30mg
+- Fluids / IV meds / IM meds / TTOs</pre>
+        </div>
+        <div class="card">
+          <h3 style="margin:4px 0 8px">Oxygen guide (local notes)</h3>
+          <pre>Blue 24% = 2L
+White 28% = 4L
+Yellow 35% = 8L
+Red 40% = 10L
+Pink 50% = 13L
+Green 60% = 15L
+
+Emergency: oxygen must be prescribed (15L NRB in emergency as noted).</pre>
+        </div>
+      </div>
     </div>
   </div>
 
-  <script>
-    const meds = [
-      'Paracetamol','Ibuprofen','Codeine','Morphine','Oxycodone','Tramadol','Fentanyl',
-      'Ondansetron','Cyclizine','Metoclopramide','Prochlorperazine',
-      'Amoxicillin','Co-amoxiclav','Piperacillin/tazobactam','Gentamicin','Vancomycin','Clarithromycin','Doxycycline','Nitrofurantoin',
-      'Salbutamol','Ipratropium','Hydrocortisone','Prednisolone','Dexamethasone',
-      'Insulin (rapid-acting)','Insulin (long-acting)','Metformin',
-      'Enoxaparin','Warfarin','Apixaban','Rivaroxaban',
-      'Amlodipine','Ramipril','Bisoprolol','Furosemide','GTN spray',
-      'Omeprazole','Lansoprazole','Lactulose',
-      'Diazepam','Lorazepam','Haloperidol'
-    ];
+<script>
+const meds = {
+  'Aciclovir': {class:'Antiviral', prep:'250-500mg in 100ml NaCl; 500mg-1g in 250ml NaCl', admin:'Alaris pump over 1 hour', notes:'IV infusion'},
+  'Amiodarone': {class:'Anti-arrhythmic', prep:'300mg in 50ml, dilute with 5% glucose (NOT NaCl)', admin:'Give over 20-120 mins', notes:'Infusion only with glucose 5%'},
+  'Amoxicillin': {class:'Penicillin antibiotic', prep:'1g vial + 20ml WFI; can add to 100ml NaCl', admin:'Give slowly IV or infusion', notes:'Check allergy'},
+  'Benzylpenicillin': {class:'Penicillin antibiotic', prep:'10ml WFI into each vial; can add to 100ml NaCl', admin:'Bolus/infusion per local protocol', notes:'BENPEN references in local notes'},
+  'Ceftriaxone': {class:'Antibiotic', prep:'Add 2g to 100ml NaCl', admin:'Infuse over 30 mins', notes:'As per local note'},
+  'Clarithromycin': {class:'Antibiotic', prep:'500mg dilute in 10ml WFI then add to 250ml NaCl', admin:'Infuse over 1 hour', notes:'Chest/cellulitis note'},
+  'Co-amoxiclav': {class:'Antibiotic', prep:'Add 20ml WFI', admin:'Give bolus or per local infusion protocol', notes:'Local note mentions bolus'},
+  'Cyclizine': {class:'Anti-sickness', prep:'Dilute to 10ml with WFI/NaCl', admin:'Bolus/slow drip per local note', notes:'Can be in 50-100ml NaCl as noted'},
+  'Dexamethasone': {class:'Steroid', prep:'3.3/6.6mg dilute to 10ml NaCl; 9.9mg into 50ml NaCl', admin:'Push over ~3 mins or infusion per note', notes:'Allergy/asthma/COPD contexts'},
+  'Flucloxacillin': {class:'Antibiotic', prep:'1g + 20ml WFI then add to 100ml NaCl', admin:'Infuse over 30 mins', notes:'Resp/skin infections note'},
+  'Furosemide': {class:'Diuretic', prep:'Up to 40mg: add 20ml NaCl; above 40mg: add to 50ml NaCl', admin:'Slow push for <=40mg; infusion-style above 40mg per local note', notes:'Excess fluid build-up'},
+  'Gentamicin': {class:'UTI antibiotic', prep:'Dose prescribed mg/80 (local stock note); add to 100ml NaCl', admin:'Alaris pump over 1 hour', notes:'Must be on gentamicin card'},
+  'Hydrocortisone': {class:'Steroid', prep:'Dilute with 10ml WFI', admin:'Give bolus', notes:'Allergy/asthma/COPD use cases'},
+  'Levetiracetam': {class:'Anti-epileptic', prep:'1g add to 100ml NaCl', admin:'Infusion', notes:'Seizure context'},
+  'Magnesium sulfate': {class:'Severe asthma support', prep:'2g in 100ml NaCl (2g in 4ml stock note)', admin:'Alaris infusion over 20 mins', notes:'Use IV infusion chart as per note'},
+  'Meropenem': {class:'Antibiotic', prep:'Mix with 20ml WFI then add to 100ml NaCl', admin:'Infuse over 30 mins', notes:'As local note'},
+  'Midazolam': {class:'Sedative', prep:'Dilute with 10ml NaCl', admin:'Bolus per local protocol', notes:'Sedation context'},
+  'Morphine': {class:'Opiate analgesic', prep:'10mg in 5ml; dilute with 10ml NaCl (1mg/ml)', admin:'Titrate/bolus per local protocol', notes:'Two-person check list includes morphine'},
+  'Omeprazole': {class:'PPI', prep:'40mg: mix with 10ml WFI then add to 100ml NaCl', admin:'Infusion per local chart', notes:'Must be on omeprazole chart'},
+  'Ondansetron': {class:'Anti-sickness', prep:'Can give neat 4mg/2ml or dilute to 10ml NaCl', admin:'Give slowly', notes:'As local note'},
+  'Pabrinex': {class:'Vitamin B/C', prep:'Add to 100ml NaCl', admin:'Infusion', notes:'Yellow colour note'},
+  'Sodium valproate': {class:'Anti-epileptic', prep:'Add to 50ml NaCl', admin:'Give over 1 hour', notes:'Infusion context'},
+  'Tazocin': {class:'Antibiotic (sepsis)', prep:'Mix with 20ml WFI then add to 100ml NaCl', admin:'Infuse over 30 mins', notes:'8-hourly note in frequency list'},
+  'Teicoplanin': {class:'Antibiotic (MRSA)', prep:'Mix with 20ml WFI; 400mg into 100ml NaCl', admin:'Infusion per local protocol', notes:'As local note'},
+  'Tranexamic acid': {class:'Bleeding control', prep:'Add to 100ml NaCl', admin:'Infusion per local protocol', notes:'Controls bleeding'},
+};
+const frequencyNotes = `Doxy 200mg then 100mg OD\nNitro 50mg QDS (6-hourly) / 100mg DS (12-hourly)\nClari 12-hourly\nCo-amox 8-hourly\nTazocin 8-hourly\nMetronidazole 8-hourly\nBENPEN 6-hourly`;
+const quickNotes = `Toxbase details captured separately (not displayed in public UI).\nEmergency oxygen note: 15L NRB in emergency as documented.\nContact noted: 03306784000`;
 
-    function initMedicationLists(){
-      const select=document.getElementById('medSelect');
-      const list=document.getElementById('medList');
-      meds.forEach(m=>{
-        const o=document.createElement('option'); o.value=m; o.textContent=m; select.appendChild(o);
-        const d=document.createElement('option'); d.value=m; list.appendChild(d);
-      });
-    }
+function showTab(id,btn){
+  document.querySelectorAll('.tabview').forEach(v=>v.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+function init(){
+  const s=document.getElementById('medSelect');
+  Object.keys(meds).sort().forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;s.appendChild(o);});
+  s.value=Object.keys(meds).sort()[0];
+  renderMed();
+  document.getElementById('freqOut').textContent=frequencyNotes;
+  document.getElementById('quickOut').textContent=quickNotes;
+  bot('Hi — ask me about a listed medication prep/admin flow.');
+}
+function searchMed(){
+  const q=document.getElementById('medSearch').value.trim().toLowerCase();
+  if(!q) return;
+  const hit=Object.keys(meds).find(m=>m.toLowerCase().includes(q));
+  if(hit){document.getElementById('medSelect').value=hit; renderMed();}
+}
+function renderMed(){
+  const m=document.getElementById('medSelect').value; const d=meds[m];
+  const out=`${m}\nClass: ${d.class}\n\nHow to prepare (local notes):\n- ${d.prep}\n\nHow to administer (local notes):\n- ${d.admin}\n\nKey notes:\n- ${d.notes}\n\nSafety:\n- Verify with local policy + BNF + Medusa before administration.`;
+  document.getElementById('medOut').textContent=out;
+}
+async function copyText(id){const t=document.getElementById(id).textContent.trim();if(!t)return;await navigator.clipboard.writeText(t);alert('Copied ✅');}
 
-    function syncMedication(){
-      const m=document.getElementById('medSelect').value;
-      if(m) document.getElementById('med').value=m;
-    }
-
-    const v=(id,f='Not specified')=>document.getElementById(id).value?.trim()||f;
-
-    function routePrepLines(route){
-      if(route.includes('IV infusion')) return [
-        '- Confirm compatible diluent and final concentration per policy/BNF/Medusa',
-        '- Reconstitute vial if required using approved diluent/volume',
-        '- Further dilute to infusion bag/syringe as locally specified',
-        '- Label syringe/bag (drug, dose, concentration, time prepared, initials)',
-        '- Prime giving set / ensure dedicated compatible line where required'
-      ];
-      if(route.includes('IV bolus')) return [
-        '- Confirm if undiluted or diluted bolus is required in local guidance',
-        '- Prepare exact volume in luer-lock syringe',
-        '- Label syringe clearly before bedside administration',
-        '- Ensure flush available if protocol requires pre/post flush'
-      ];
-      if(route==='Oral') return [
-        '- Confirm formulation (tablet/capsule/liquid) and swallowing ability',
-        '- If crushing/splitting considered, verify it is allowed',
-        '- Measure liquid dose accurately using oral syringe/medicine cup'
-      ];
-      if(route==='IM' || route==='SC') return [
-        '- Confirm site suitability and local technique guidance',
-        '- Prepare correct needle/syringe size and dose volume',
-        '- Check max volume per site per local policy'
-      ];
-      return ['- Prepare using route-specific local guidance and approved equipment'];
-    }
-
-    function routeAdminLines(route, rate){
-      if(route.includes('IV infusion')) return [
-        '- Baseline observations before starting infusion',
-        `- Start infusion using approved pump setup (${rate})`,
-        '- Monitor cannula site and patient tolerance during infusion',
-        '- Re-check observations post-infusion per protocol'
-      ];
-      if(route.includes('IV bolus')) return [
-        `- Administer slowly over approved timeframe (${rate})`,
-        '- Observe continuously for immediate adverse effects',
-        '- Flush line if required by local protocol'
-      ];
-      if(route==='Oral') return [
-        '- Confirm patient can safely swallow and is appropriate for oral route',
-        '- Administer with water/food guidance if required',
-        '- Ensure full dose taken and document refusal/vomiting if occurs'
-      ];
-      if(route==='IM') return [
-        '- Use correct IM site/technique per local protocol',
-        '- Inject at appropriate rate and angle',
-        '- Observe for pain, bleeding, immediate reactions'
-      ];
-      if(route==='SC') return [
-        '- Select appropriate SC site and rotate sites when relevant',
-        '- Administer with correct SC technique',
-        '- Monitor site for irritation/swelling'
-      ];
-      return ['- Administer per route-specific protocol and monitor patient response'];
-    }
-
-    function genPrepare(){
-      const med=v('med','Medication'), route=v('route'), factors=v('factors','None stated'), prepKnown=v('prepKnown','None provided');
-      const lines = routePrepLines(route).join('\n');
-      document.getElementById('prepareOut').textContent =
-`HOW TO PREPARE — ${med} (${route})\n\n`+
-`Pre-prep safety checks\n`+
-`- Confirm order: right medicine, dose, route, timing, indication\n`+
-`- 2 patient identifiers + allergy status\n`+
-`- Review patient factors: ${factors}\n\n`+
-`Practical preparation steps\n${lines}\n\n`+
-`Local info entered\n- ${prepKnown}\n\n`+
-`Final pause before admin\n- Re-verify with local policy + BNF + Medusa before giving.`;
-    }
-
-    function genAdmin(){
-      const med=v('med','Medication'), route=v('route'), indication=v('indication','Not stated'), rate=v('rate','use local protocol timing/rate');
-      const lines = routeAdminLines(route, rate).join('\n');
-      document.getElementById('adminOut').textContent =
-`HOW TO ADMINISTER — ${med} (${route})\nIndication: ${indication}\n\n`+
-`Before administration\n- Explain to patient, gain consent where appropriate\n- Baseline observations as required\n\n`+
-`Administration flow\n${lines}\n\n`+
-`After administration\n- Reassess response and required observations\n- Escalate immediately if deterioration or reaction\n- Document dose/time/response clearly`;
-    }
-
-    function genEffects(){
-      const med=v('med','Medication');
-      document.getElementById('effectsOut').textContent =
-`SIDE EFFECTS & RED FLAGS — ${med}\n\n`+
-`Common effects (examples only)\n- Nausea, dizziness, headache, mild rash\n\n`+
-`RED FLAGS (urgent escalation)\n- Airway/breathing compromise\n- Hypotension/syncope\n- Widespread rash / anaphylaxis signs\n- Acute deterioration post-dose\n\n`+
-`If red flag present\n- Stop administration (if ongoing)\n- Call senior help immediately\n- Follow emergency/anaphylaxis protocol\n- Document timing/actions`;
-    }
-
-    function genDoc(){
-      const med=v('med','Medication'), route=v('route');
-      document.getElementById('docOut').textContent =
-`DOCUMENTATION TEMPLATE\n\nMedication: ${med}\nRoute: ${route}\nDose/time: ____\nIndication: ____\nPrep checks complete: yes/no\nAdmin method/rate: ____\nPatient response: ____\nSide effects/red flags: ____\nEscalation actions: ____\nSignature/name: ____`;
-    }
-
-    async function copyText(id){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); await navigator.clipboard.writeText(t); alert('Copied ✅'); }
-    function downloadText(id,name){ const t=document.getElementById(id).textContent.trim(); if(!t) return alert('Generate first'); const b=new Blob([t],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
-
-    initMedicationLists();
-  </script>
+function bot(text,user=false){
+  const box=document.getElementById('chatbox');
+  const d=document.createElement('div'); d.className='msg '+(user?'u':'b'); d.textContent=text; box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+function sendChat(){
+  const i=document.getElementById('chatIn'); const q=i.value.trim(); if(!q)return; bot(q,true); i.value='';
+  const low=q.toLowerCase();
+  const med=Object.keys(meds).find(m=>low.includes(m.toLowerCase()));
+  if(med){
+    const d=meds[med];
+    bot(`${med}: prep -> ${d.prep}. admin -> ${d.admin}. notes -> ${d.notes}. Verify against policy/BNF/Medusa.`);
+    return;
+  }
+  if(low.includes('oxygen')){bot('Oxygen masks from local note: blue 24%/2L, white 28%/4L, yellow 35%/8L, red 40%/10L, pink 50%/13L, green 60%/15L.');return;}
+  if(low.includes('check')){bot('Two-person checks include morphine/codeine/fluids/IV/IM meds; one-person includes oral meds, salbutamol, ipratropium, etc (per local notes).');return;}
+  bot('I can answer best for meds in your local list. If missing, add the medication notes and I’ll use those.');
+}
+init();
+</script>
 </body>
 </html>
