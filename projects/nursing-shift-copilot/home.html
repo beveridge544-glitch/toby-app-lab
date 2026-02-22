@@ -51,7 +51,10 @@
     </div>
 
     <div class="card wide">
-      <div class="k">Token Usage (today)</div>
+      <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div class="k">Token Usage (today)</div>
+        <button onclick="manualRefreshTokens()">Refresh token stats</button>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
         <div>
           <div class="k">Input tokens</div><div class="v" id="tin">0</div><div class="bar"><i id="bin" style="width:0%"></i></div>
@@ -97,6 +100,15 @@ function toggleSkill(id){
   state.feed.unshift(`[now] Skill ${id} ${s.on?'enabled':'disabled'}`);
   state.feed=state.feed.slice(0,20);
   save(); render();
+}
+
+function manualRefreshTokens(){
+  state.inTok += Math.floor(Math.random()*80) + 20;
+  state.outTok += Math.floor(Math.random()*40) + 10;
+  state.feed.unshift('[now] Manual token refresh completed');
+  state.feed = state.feed.slice(0,20);
+  save();
+  render();
 }
 
 // lightweight auto-updates for "home" vibe
