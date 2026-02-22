@@ -3,49 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toby Progress Board — Minimal+</title>
+  <title>Toby Progress Board — Pro</title>
   <style>
-    :root{--bg:#f5f5f7;--panel:#fff;--text:#111;--muted:#6e6e73;--line:#e5e5ea;--backlog:#8e8e93;--progress:#0a84ff;--done:#30d158}
+    :root{--bg:#f5f5f7;--panel:#fff;--text:#111;--muted:#6e6e73;--line:#e5e5ea;--backlog:#8e8e93;--progress:#0a84ff;--done:#30d158;--over:#ff3b30}
     *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px} h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-.02em}
-    .sub{color:var(--muted);margin:0 0 16px}
-    .controls{display:grid;grid-template-columns:1fr 180px 130px;gap:10px;margin-bottom:10px}
-    .controls2{display:grid;grid-template-columns:1fr 180px 130px 130px;gap:10px;margin-bottom:14px}
-    input,button,select{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:15px}
-    button{cursor:pointer} .add{background:#111;color:#fff;border:none}
+    .wrap{max-width:1180px;margin:0 auto;padding:20px} h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-.02em}
+    .sub{color:var(--muted);margin:0 0 14px}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+    .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}.stat .k{font-size:12px;color:var(--muted)}.stat .v{font-size:20px;font-weight:700}
+    .controls,.controls2,.controls3{display:grid;gap:10px;margin-bottom:10px}
+    .controls{grid-template-columns:1fr 170px 130px}
+    .controls2{grid-template-columns:1fr 170px 130px 130px}
+    .controls3{grid-template-columns:1fr 140px 140px 120px 130px}
+    input,button,select,textarea{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:14px}
+    button{cursor:pointer}.add{background:#111;color:#fff;border:none}
     .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
     .col{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:360px}
     .colhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
     .colhead h2{margin:0;font-size:16px;font-weight:600}
     .count{font-size:12px;color:#fff;padding:3px 8px;border-radius:999px}.count.backlog{background:var(--backlog)}.count.progress{background:var(--progress)}.count.done{background:var(--done)}
     .card{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#fff}
-    .task{font-size:15px;line-height:1.4}.meta{font-size:12px;color:var(--muted);margin-top:6px}
-    .row{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
-    .mini{border:1px solid var(--line);background:#fff;color:#111;padding:6px 9px;border-radius:8px;font-size:12px;cursor:pointer}
-    .mini.del{color:#ff3b30}
-    @media (max-width:900px){.board{grid-template-columns:1fr}.controls,.controls2{grid-template-columns:1fr}}
+    .card.overdue{border-color:var(--over); box-shadow:0 0 0 1px #ff3b3030}
+    .task{font-size:15px;line-height:1.35}.meta{font-size:12px;color:var(--muted);margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+    .pill{border:1px solid var(--line);border-radius:999px;padding:2px 8px}.pill.over{border-color:var(--over);color:var(--over)}
+    .row{display:flex;justify-content:space-between;gap:6px;margin-top:8px}.mini{border:1px solid var(--line);background:#fff;color:#111;padding:6px 9px;border-radius:8px;font-size:12px;cursor:pointer}
+    .mini.del{color:#ff3b30}.mini.note{color:#0a84ff}
+    .today{margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+    .today ul{margin:8px 0 0 18px}
+    @media (max-width:980px){.board{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.controls,.controls2,.controls3{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Toby Progress Board</h1>
-  <p class="sub">Now with project filters + WORKLOG import.</p>
+  <p class="sub">Auto-import, stats, notes, deadlines, recurring tasks, Today Focus, and export snapshot.</p>
 
-  <div class="controls">
-    <input id="newTask" placeholder="Add task..." />
-    <select id="newProject">
-      <option value="App">App</option><option value="KDP">KDP</option><option value="Personal">Personal</option><option value="Other">Other</option>
-    </select>
+  <div class="stats">
+    <div class="stat"><div class="k">Done today</div><div id="sDoneToday" class="v">0</div></div>
+    <div class="stat"><div class="k">Done this week</div><div id="sDoneWeek" class="v">0</div></div>
+    <div class="stat"><div class="k">Completion rate</div><div id="sRate" class="v">0%</div></div>
+    <div class="stat"><div class="k">Overdue</div><div id="sOverdue" class="v">0</div></div>
+  </div>
+
+  <div class="today">
+    <strong>Today Focus</strong>
+    <ul id="todayList"></ul>
+  </div>
+
+  <div class="controls3">
+    <input id="newTask" placeholder="Task title..." />
+    <select id="newProject"><option>App</option><option>KDP</option><option>Personal</option><option>Other</option></select>
+    <select id="newRecurring"><option value="none">No repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select>
+    <input id="newDue" type="date" />
     <button class="add" onclick="addTask()">Add</button>
   </div>
 
   <div class="controls2">
     <input id="worklogInput" placeholder="Paste one WORKLOG line and import to backlog..." />
-    <select id="filterProject" onchange="render()">
-      <option value="All">All projects</option><option value="App">App</option><option value="KDP">KDP</option><option value="Personal">Personal</option><option value="Other">Other</option>
-    </select>
+    <select id="filterProject" onchange="render()"><option>All</option><option>App</option><option>KDP</option><option>Personal</option><option>Other</option></select>
     <button onclick="importWorklogLine()">Import line</button>
-    <button onclick="clearBoard()">Reset board</button>
+    <button onclick="importLastWorklog()">Import last 5 log lines</button>
+  </div>
+
+  <div class="controls">
+    <textarea id="worklogBlock" rows="2" placeholder="Optional: paste multiple WORKLOG lines here for batch import"></textarea>
+    <button onclick="importBlock()">Import block</button>
+    <button onclick="exportSnapshot()">Export snapshot</button>
   </div>
 
   <div class="board">
@@ -56,55 +79,169 @@
 </div>
 
 <script>
-const KEY='toby-progress-board-minimal-v2';
+const KEY='toby-progress-board-pro-v1';
+const DONE_KEY='toby-progress-done-log-v1';
 const seed=[
-  {id:1,text:'Expand medication list with priority meds',status:'backlog',project:'App'},
-  {id:2,text:'Refine prepare/administer outputs',status:'progress',project:'App'},
-  {id:3,text:'Track KDP listing improvements',status:'backlog',project:'KDP'},
-  {id:4,text:'Ship minimal board + worklog import',status:'done',project:'App'}
+  {id:1,text:'Expand medication list with priority meds',status:'backlog',project:'App',due:'',note:'',recurring:'none',createdAt:Date.now()},
+  {id:2,text:'Refine prepare/administer outputs',status:'progress',project:'App',due:'',note:'',recurring:'daily',createdAt:Date.now()},
+  {id:3,text:'Track KDP listing improvements',status:'backlog',project:'KDP',due:'',note:'',recurring:'weekly',createdAt:Date.now()}
 ];
+const builtInWorklog=[
+  'Shipped v0.4 medication-focused pivot',
+  'Shipped v0.5 practical prepare/administer structure',
+  'Shipped v0.6 medication dropdown + searchable list',
+  'Built progress board and improved UI',
+  'Added WORKLOG tracking and pushed to GitHub'
+];
+
 function load(){const raw=localStorage.getItem(KEY); return raw?JSON.parse(raw):seed}
 function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks))}
+function loadDone(){const raw=localStorage.getItem(DONE_KEY); return raw?JSON.parse(raw):[]}
+function saveDone(arr){localStorage.setItem(DONE_KEY,JSON.stringify(arr.slice(-200)))}
 function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog'}
 function activeFilter(){return document.getElementById('filterProject').value||'All'}
+function todayISO(){return new Date().toISOString().slice(0,10)}
+function weekStart(d){const x=new Date(d); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); x.setHours(0,0,0,0); return x;}
+function isOverdue(due,status){if(!due || status==='done') return false; return due < todayISO();}
+function fmtDate(d){return d?new Date(d+'T00:00:00').toLocaleDateString():'No due date'}
+
+function handleRecurring(tasks){
+  const today=todayISO();
+  return tasks.map(t=>{
+    if(t.status!=='done' || t.recurring==='none' || !t.completedAt) return t;
+    if(t.recurring==='daily' && t.completedAt < today) return {...t,status:'backlog',completedAt:''};
+    if(t.recurring==='weekly'){
+      const c=new Date(t.completedAt+'T00:00:00');
+      if(weekStart(new Date()).getTime()>weekStart(c).getTime()) return {...t,status:'backlog',completedAt:''};
+    }
+    return t;
+  });
+}
 
 function render(){
-  const tasks=load();
+  let tasks=handleRecurring(load()); save(tasks);
   const filter=activeFilter();
-  const shown = filter==='All' ? tasks : tasks.filter(t=>t.project===filter);
+  const shown=filter==='All'?tasks:tasks.filter(t=>t.project===filter);
   const buckets={backlog:0,progress:0,done:0};
   ['backlog','progress','done'].forEach(c=>document.getElementById(c).innerHTML='');
+
   shown.forEach(t=>{
     buckets[t.status]++;
-    const el=document.createElement('div'); el.className='card';
+    const over=isOverdue(t.due,t.status);
+    const el=document.createElement('div'); el.className='card'+(over?' overdue':'');
     el.innerHTML=`<div class='task'>${t.text}</div>
-      <div class='meta'>Project: ${t.project}</div>
+      <div class='meta'>
+        <span class='pill'>${t.project}</span>
+        <span class='pill'>Due: ${fmtDate(t.due)}</span>
+        ${over?`<span class='pill over'>Overdue</span>`:''}
+        ${t.recurring!=='none'?`<span class='pill'>${t.recurring}</span>`:''}
+      </div>
+      ${t.note?`<div class='meta'>Note: ${t.note}</div>`:''}
       <div class='row'>
-        <button class='mini' onclick='move(${t.id})'>Move</button>
-        <button class='mini del' onclick='delTask(${t.id})'>Delete</button>
+        <span></span>
+        <span>
+          <button class='mini note' onclick='editNote(${t.id})'>Note</button>
+          <button class='mini' onclick='move(${t.id})'>Move</button>
+          <button class='mini del' onclick='delTask(${t.id})'>Delete</button>
+        </span>
       </div>`;
     document.getElementById(t.status).appendChild(el);
   });
+
   document.getElementById('c-backlog').textContent=buckets.backlog;
   document.getElementById('c-progress').textContent=buckets.progress;
   document.getElementById('c-done').textContent=buckets.done;
+  renderStats(tasks);
+  renderToday(tasks);
 }
 
 function addTask(){
-  const i=document.getElementById('newTask'); const p=document.getElementById('newProject');
-  const text=i.value.trim(); if(!text) return;
-  const t=load(); t.unshift({id:Date.now(),text,status:'backlog',project:p.value||'Other'}); save(t);
-  i.value=''; render();
+  const text=document.getElementById('newTask').value.trim(); if(!text) return;
+  const project=document.getElementById('newProject').value||'Other';
+  const due=document.getElementById('newDue').value||'';
+  const recurring=document.getElementById('newRecurring').value||'none';
+  const tasks=load(); tasks.unshift({id:Date.now(),text,status:'backlog',project,due,note:'',recurring,createdAt:Date.now(),completedAt:''});
+  save(tasks); document.getElementById('newTask').value=''; render();
 }
-function importWorklogLine(){
-  const i=document.getElementById('worklogInput'); const text=i.value.trim(); if(!text) return;
-  const guessed = /kdp/i.test(text)?'KDP':/app|deploy|ui|feature|medication/i.test(text)?'App':'Other';
-  const t=load(); t.unshift({id:Date.now(),text,status:'backlog',project:guessed}); save(t);
-  i.value=''; render();
+
+function move(id){
+  const tasks=load().map(t=>{
+    if(t.id!==id) return t;
+    const ns=nextStatus(t.status);
+    if(ns==='done'){
+      const done=loadDone(); done.push({id:t.id,text:t.text,at:todayISO()}); saveDone(done);
+      return {...t,status:ns,completedAt:todayISO()};
+    }
+    return {...t,status:ns};
+  });
+  save(tasks); render();
 }
-function move(id){save(load().map(t=>t.id===id?({...t,status:nextStatus(t.status)}):t)); render();}
+
 function delTask(id){save(load().filter(t=>t.id!==id)); render();}
-function clearBoard(){localStorage.removeItem(KEY); render();}
+
+function importWorklogLine(){
+  const input=document.getElementById('worklogInput'); const text=input.value.trim(); if(!text) return;
+  importTextAsTask(text); input.value='';
+}
+function importLastWorklog(){ builtInWorklog.slice(-5).forEach(importTextAsTask); }
+function importBlock(){
+  const raw=document.getElementById('worklogBlock').value.trim(); if(!raw) return;
+  raw.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,20).forEach(importTextAsTask);
+  document.getElementById('worklogBlock').value='';
+}
+function importTextAsTask(text){
+  const guessed=/kdp/i.test(text)?'KDP':/app|deploy|ui|feature|medication|board/i.test(text)?'App':/personal|gym|health/i.test(text)?'Personal':'Other';
+  const tasks=load(); tasks.unshift({id:Date.now()+Math.floor(Math.random()*999),text,status:'backlog',project:guessed,due:'',note:'',recurring:'none',createdAt:Date.now(),completedAt:''});
+  save(tasks); render();
+}
+
+function editNote(id){
+  const tasks=load(); const t=tasks.find(x=>x.id===id); if(!t) return;
+  const note=prompt('Task note',t.note||''); if(note===null) return;
+  t.note=note.trim(); save(tasks); render();
+}
+
+function renderStats(tasks){
+  const doneLog=loadDone();
+  const today=todayISO();
+  const ws=weekStart(new Date());
+  const doneToday=doneLog.filter(x=>x.at===today).length;
+  const doneWeek=doneLog.filter(x=>new Date(x.at+'T00:00:00')>=ws).length;
+  const total=tasks.length||1;
+  const done=tasks.filter(t=>t.status==='done').length;
+  const overdue=tasks.filter(t=>isOverdue(t.due,t.status)).length;
+  document.getElementById('sDoneToday').textContent=doneToday;
+  document.getElementById('sDoneWeek').textContent=doneWeek;
+  document.getElementById('sRate').textContent=Math.round((done/total)*100)+'%';
+  document.getElementById('sOverdue').textContent=overdue;
+}
+
+function renderToday(tasks){
+  const list=document.getElementById('todayList'); list.innerHTML='';
+  const today=todayISO();
+  const todayItems=tasks.filter(t=>t.status!=='done' && (t.due===today || t.priority==='high')).slice(0,5);
+  const items=todayItems.length?todayItems:tasks.filter(t=>t.status!=='done').slice(0,5);
+  if(!items.length){list.innerHTML='<li>No active tasks.</li>'; return;}
+  items.forEach(t=>{ const li=document.createElement('li'); li.textContent=`${t.text} (${t.project})`; list.appendChild(li); });
+}
+
+function exportSnapshot(){
+  const tasks=load();
+  const lines=[
+    `Toby Progress Snapshot — ${new Date().toLocaleString()}`,
+    `Backlog: ${tasks.filter(t=>t.status==='backlog').length}`,
+    `In Progress: ${tasks.filter(t=>t.status==='progress').length}`,
+    `Done: ${tasks.filter(t=>t.status==='done').length}`,
+    '',
+    'Top items:'
+  ];
+  tasks.slice(0,12).forEach(t=>lines.push(`- [${t.status}] (${t.project}) ${t.text}`));
+  const text=lines.join('\n');
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='progress-snapshot.txt'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 render();
 </script>
 </body>
