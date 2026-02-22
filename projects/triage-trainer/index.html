@@ -1,191 +1,73 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Triage Shift Simulator v2</title>
-  <style>
-    :root{--bg:#0b1220;--panel:#111a2d;--card:#17233d;--text:#e6ecff;--muted:#9fb0d1;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#4f8cff}
-    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0a1020,#0c1730);color:var(--text);font-family:Inter,Arial,sans-serif}
-    .wrap{max-width:1200px;margin:0 auto;padding:14px}
-    h1{margin:0 0 6px}.muted{color:var(--muted)}
-    .top{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
-    .hud{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
-    .stat{background:var(--panel);border:1px solid #2c3a5f;border-radius:10px;padding:8px}
-    .k{font-size:12px;color:var(--muted)} .v{font-size:20px;font-weight:700}
-    .grid{display:grid;grid-template-columns:1.2fr .9fr;gap:10px}
-    .panel{background:var(--panel);border:1px solid #2c3a5f;border-radius:12px;padding:10px;min-height:360px}
-    .queue{display:grid;gap:8px;max-height:520px;overflow:auto}
-    .p{background:var(--card);border:1px solid #32456f;border-radius:10px;padding:8px}
-    .p h3{margin:0 0 4px;font-size:16px}
-    .badges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
-    .b{font-size:11px;border:1px solid #3a4e79;color:var(--muted);padding:2px 7px;border-radius:999px}
-    .sev-1{color:#fecaca;border-color:#7f1d1d;background:#450a0a66}
-    .sev-2{color:#fde68a;border-color:#854d0e;background:#451a0366}
-    .sev-3{color:#bbf7d0;border-color:#166534;background:#052e1666}
-    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-    button{padding:8px 10px;border-radius:8px;border:1px solid #3a4e79;background:#0d1830;color:var(--text);cursor:pointer}
-    button.primary{background:linear-gradient(90deg,#2b6ef3,#5a45ea);border:none}
-    .log{max-height:460px;overflow:auto;display:grid;gap:6px}
-    .event{font-size:13px;background:#0d1830;border:1px solid #2b3f68;border-radius:8px;padding:7px}
-    .ok{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
-    .footer{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
-    @media(max-width:980px){.hud{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}
-  </style>
-</head>
-<body>
-<div class="wrap">
-  <div class="top">
-    <div>
-      <h1>Triage Shift Simulator v2</h1>
-      <div class="muted">Educational simulation only — not for live clinical decisions.</div>
-    </div>
-    <div class="footer">
-      <button onclick="newGame()">New Shift</button>
-      <button onclick="togglePause()" id="pauseBtn">Pause</button>
-    </div>
-  </div>
-
-  <div class="hud">
-    <div class="stat"><div class="k">Time</div><div class="v" id="time">00:00</div></div>
-    <div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
-    <div class="stat"><div class="k">Lives</div><div class="v" id="lives">3</div></div>
-    <div class="stat"><div class="k">Queue</div><div class="v" id="qcount">0</div></div>
-    <div class="stat"><div class="k">Seen</div><div class="v" id="seen">0</div></div>
-    <div class="stat"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
-  </div>
-
-  <div class="grid">
-    <div class="panel">
-      <h2 style="margin:0 0 8px">Waiting Room</h2>
-      <div id="queue" class="queue"></div>
-    </div>
-    <div class="panel">
-      <h2 style="margin:0 0 8px">Shift Log</h2>
-      <div id="log" class="log"></div>
-    </div>
-  </div>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Triage Shift Simulator v3</title>
+<style>
+:root{--bg:#0b1220;--panel:#111a2d;--card:#17233d;--text:#e6ecff;--muted:#9fb0d1;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#0a1020,#0c1730);color:var(--text);font-family:Inter,Arial,sans-serif}.wrap{max-width:1200px;margin:0 auto;padding:14px}
+.hud{display:grid;grid-template-columns:repeat(10,1fr);gap:8px;margin:10px 0}.stat{background:var(--panel);border:1px solid #2c3a5f;border-radius:10px;padding:8px}.k{font-size:12px;color:var(--muted)}.v{font-size:18px;font-weight:700}
+.grid{display:grid;grid-template-columns:1.2fr .9fr;gap:10px}.panel{background:var(--panel);border:1px solid #2c3a5f;border-radius:12px;padding:10px;min-height:360px}
+.queue{display:grid;gap:8px;max-height:540px;overflow:auto}.p{background:var(--card);border:1px solid #32456f;border-radius:10px;padding:8px}.badges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.b{font-size:11px;border:1px solid #3a4e79;color:var(--muted);padding:2px 7px;border-radius:999px}
+.controls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}button{padding:8px;border-radius:8px;border:1px solid #3a4e79;background:#0d1830;color:var(--text);cursor:pointer}.footer{display:flex;gap:8px;flex-wrap:wrap}
+.event{font-size:13px;background:#0d1830;border:1px solid #2b3f68;border-radius:8px;padding:7px;margin-bottom:6px}.ok{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+@media(max-width:980px){.hud{grid-template-columns:repeat(5,1fr)}.grid{grid-template-columns:1fr}}
+</style></head><body><div class="wrap">
+<h1>Triage Shift Simulator v3</h1><div class="footer"><button onclick="newGame()">New Shift</button><button onclick="togglePause()" id="pauseBtn">Pause</button></div>
+<div class="hud">
+<div class="stat"><div class="k">Time</div><div class="v" id="time">00:00</div></div>
+<div class="stat"><div class="k">Score</div><div class="v" id="score">0</div></div>
+<div class="stat"><div class="k">Lives</div><div class="v" id="lives">3</div></div>
+<div class="stat"><div class="k">Queue</div><div class="v" id="qcount">0</div></div>
+<div class="stat"><div class="k">Seen</div><div class="v" id="seen">0</div></div>
+<div class="stat"><div class="k">Nurses</div><div class="v" id="nurses">3</div></div>
+<div class="stat"><div class="k">Doctors</div><div class="v" id="docs">2</div></div>
+<div class="stat"><div class="k">Beds</div><div class="v" id="beds">6</div></div>
+<div class="stat"><div class="k">Resus Bays</div><div class="v" id="resus">2</div></div>
+<div class="stat"><div class="k">Incidents</div><div class="v" id="inc">0</div></div>
 </div>
-
+<div class="grid"><div class="panel"><h2>Waiting Room</h2><div id="queue" class="queue"></div></div><div class="panel"><h2>Shift Log</h2><div id="log"></div></div></div>
+</div>
 <script>
-const NAMES=['Alex','Sam','Jordan','Taylor','Casey','Riley','Morgan','Jamie','Chris','Avery'];
-const SCENARIOS=[
-  {title:'Chest pain + hypotension',desc:'Severe central chest pain, clammy, low BP.',truth:'Immediate',sev:1},
-  {title:'Anaphylaxis signs',desc:'Wheeze, lip swelling, hypotension after drug.',truth:'Immediate',sev:1},
-  {title:'Stroke symptoms',desc:'Sudden unilateral weakness + slurred speech.',truth:'Very Urgent',sev:1},
-  {title:'Sepsis concern',desc:'Fever, confusion, tachycardia, low BP.',truth:'Very Urgent',sev:1},
-  {title:'Head injury on anticoagulant',desc:'Fall + head strike, currently stable.',truth:'Urgent',sev:2},
-  {title:'Abdo pain stable',desc:'Pain 7/10, stable observations.',truth:'Urgent',sev:2},
-  {title:'Minor laceration',desc:'Small cut, bleeding controlled, normal obs.',truth:'Standard',sev:3},
-  {title:'UTI symptoms mild',desc:'Dysuria/frequency, obs normal.',truth:'Non-Urgent',sev:3},
-  {title:'Ankle sprain weight-bearing',desc:'Painful but mobilising, no deformity.',truth:'Standard',sev:3}
-];
 const LEVELS=['Immediate','Very Urgent','Urgent','Standard','Non-Urgent'];
-let state;
-
-function rand(a){return a[Math.floor(Math.random()*a.length)]}
-function fmt(sec){const m=String(Math.floor(sec/60)).padStart(2,'0');const s=String(sec%60).padStart(2,'0');return `${m}:${s}`}
-
-function newGame(){
-  state={time:0,score:0,lives:3,seen:0,streak:0,queue:[],nextSpawn:3,paused:false,ended:false};
-  log('Shift started. Triage safely and prioritise deterioration.','ok');
-  render();
-}
-
-function spawn(){
-  const sc=JSON.parse(JSON.stringify(rand(SCENARIOS)));
-  const id=Date.now()+Math.floor(Math.random()*9999);
-  const p={id,name:rand(NAMES),age:Math.floor(Math.random()*70)+18,wait:0,deterioration:0,...sc};
-  state.queue.push(p);
-}
-
-function tick(){
-  if(!state||state.paused||state.ended) return;
-  state.time++;
-  state.nextSpawn--;
-  if(state.nextSpawn<=0){spawn();state.nextSpawn=Math.max(2,7-Math.floor(state.time/45));}
-
-  state.queue.forEach(p=>{
-    p.wait++;
-    if(p.sev===1 && p.wait>25) p.deterioration+=2;
-    else if(p.sev===2 && p.wait>40) p.deterioration+=1;
-    else if(p.wait>70) p.deterioration+=1;
-
-    if(p.deterioration>=6){
-      state.lives--;
-      log(`Patient deteriorated in queue: ${p.title} (${p.name})`,'bad');
-      p.deterioration=0; p.wait=0; // reset after event
-    }
-  });
-
-  if(state.lives<=0){
-    state.ended=true;
-    log('Shift ended: safety threshold reached.','bad');
-  }
-
-  render();
-}
-
-function triage(id,chosen){
-  if(state.ended) return;
-  const idx=state.queue.findIndex(p=>p.id===id); if(idx<0) return;
-  const p=state.queue[idx];
-  const correct=p.truth===chosen;
-  let delta=0;
-  if(correct){
-    delta=30 + Math.max(0,20-p.wait) + (p.sev===1?20:0);
-    state.streak++;
-    log(`✔ Correct triage: ${p.title} → ${chosen}`,'ok');
-  } else {
-    const dist=Math.abs(LEVELS.indexOf(p.truth)-LEVELS.indexOf(chosen));
-    delta=-(20+dist*15+(p.sev===1?20:0));
-    state.streak=0;
-    if(p.sev===1 && LEVELS.indexOf(chosen)>1){state.lives--;log(`✖ Critical under-triage: ${p.title} picked ${chosen}`,'bad');}
-    else log(`✖ Not ideal: ${p.title} should be ${p.truth}, picked ${chosen}`,'warn');
-  }
-  state.score=Math.max(0,state.score+delta);
-  state.seen++;
-  state.queue.splice(idx,1);
-  render();
-}
-
-function render(){
-  document.getElementById('time').textContent=fmt(state.time);
-  document.getElementById('score').textContent=state.score;
-  document.getElementById('lives').textContent=state.lives;
-  document.getElementById('qcount').textContent=state.queue.length;
-  document.getElementById('seen').textContent=state.seen;
-  document.getElementById('streak').textContent=state.streak;
-  document.getElementById('pauseBtn').textContent=state.paused?'Resume':'Pause';
-
-  const q=document.getElementById('queue'); q.innerHTML='';
-  const sorted=[...state.queue].sort((a,b)=>(b.sev+b.deterioration*0.5)-(a.sev+a.deterioration*0.5));
-  sorted.forEach(p=>{
-    const d=document.createElement('div'); d.className='p';
-    d.innerHTML=`<h3>${p.title}</h3>
-      <div class='muted'>${p.name}, ${p.age}y — ${p.desc}</div>
-      <div class='badges'>
-        <span class='b sev-${p.sev}'>Severity ${p.sev}</span>
-        <span class='b'>Wait ${p.wait}s</span>
-        <span class='b ${p.deterioration>=4?'sev-1':''}'>Deterioration ${p.deterioration}</span>
-      </div>
-      <div class='controls'>
-        <button onclick="triage(${p.id},'Immediate')">Immediate</button>
-        <button onclick="triage(${p.id},'Very Urgent')">Very Urgent</button>
-        <button onclick="triage(${p.id},'Urgent')">Urgent</button>
-        <button onclick="triage(${p.id},'Standard')">Standard</button>
-        <button onclick="triage(${p.id},'Non-Urgent')">Non-Urgent</button>
-      </div>`;
-    q.appendChild(d);
-  });
-  if(!sorted.length) q.innerHTML="<div class='muted'>No patients waiting yet...</div>";
-}
-
-function log(text,type=''){const box=document.getElementById('log');const d=document.createElement('div');d.className='event '+type;d.textContent=`[${fmt(state?state.time:0)}] ${text}`;box.prepend(d);}
-function togglePause(){if(!state) return; state.paused=!state.paused; render();}
-
-newGame();
-setInterval(tick,1000);
-</script>
-</body>
-</html>
+const SC=[
+{t:'Chest pain + hypotension',d:'Severe central pain, low BP, clammy',truth:'Immediate',sev:1},
+{t:'Anaphylaxis signs',d:'Wheeze, swelling, hypotension',truth:'Immediate',sev:1},
+{t:'Stroke symptoms',d:'FAST positive 35 mins ago',truth:'Very Urgent',sev:1},
+{t:'Sepsis concern',d:'Fever + confusion + low BP',truth:'Very Urgent',sev:1},
+{t:'Abdo pain stable',d:'Pain 7/10, stable obs',truth:'Urgent',sev:2},
+{t:'Head injury on apixaban',d:'Fall, head strike, stable now',truth:'Urgent',sev:2},
+{t:'Minor laceration',d:'Small cut controlled',truth:'Standard',sev:3},
+{t:'UTI symptoms mild',d:'Dysuria, obs normal',truth:'Non-Urgent',sev:3}
+];
+const N=['Alex','Sam','Jordan','Taylor','Casey','Riley','Morgan'];
+let st;
+const r=a=>a[Math.floor(Math.random()*a.length)];
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function log(m,c=''){const d=document.createElement('div');d.className='event '+c;d.textContent='['+fmt(st.time)+'] '+m;document.getElementById('log').prepend(d)}
+function spawn(x=1){for(let k=0;k<x;k++){const c=JSON.parse(JSON.stringify(r(SC)));st.queue.push({id:Date.now()+Math.random(),name:r(N),wait:0,deter:0,...c});}}
+function newGame(){st={time:0,score:0,lives:3,seen:0,queue:[],next:3,paused:false,ended:false,nurses:3,docs:2,beds:6,resus:2,incidents:0};document.getElementById('log').innerHTML='';log('Shift started','ok');render();}
+function incident(){st.incidents++;spawn(3);log('Major incident: 3 patients arrived at once','warn');}
+function tick(){if(!st||st.paused||st.ended)return;st.time++;st.next--;if(st.next<=0){spawn(1);st.next=Math.max(2,7-Math.floor(st.time/50));}
+if(st.time>0 && st.time%75===0) incident();
+st.queue.forEach(p=>{p.wait++;if((p.sev===1&&p.wait>22)||(p.sev===2&&p.wait>38)||(p.wait>70))p.deter++;if(p.deter>=6){st.lives--;p.deter=0;p.wait=0;log('Queue deterioration: '+p.t,'bad');}});
+if(st.lives<=0){st.ended=true;log('Shift failed: lives exhausted','bad');}
+render();}
+function triage(id,choice){if(st.ended)return;const i=st.queue.findIndex(p=>p.id===id);if(i<0)return;const p=st.queue[i];
+const under=LEVELS.indexOf(choice)-LEVELS.indexOf(p.truth); const correct=under===0; let pts=0;
+// resource constraints
+const needsResus=choice==='Immediate';
+if(needsResus && st.resus<=0){st.lives--;log('No resus bay available for immediate case','bad');}
+if(st.docs<=0||st.nurses<=0||st.beds<=0){pts-=10;log('Resource strain impacted flow','warn');}
+if(correct){pts=30+Math.max(0,20-p.wait)+(p.sev===1?20:0);st.score+=pts;log('Correct triage: '+p.t+' -> '+choice,'ok');}
+else{pts=-(20+Math.abs(under)*15+(p.sev===1?20:0));st.score=Math.max(0,st.score+pts);if(under>1&&p.sev===1){st.lives--;log('Critical under-triage: '+p.t,'bad');} else log('Suboptimal triage: '+p.t+' expected '+p.truth,'warn');}
+// consume/release simple resources
+st.nurses=Math.max(0,st.nurses-1); st.docs=Math.max(0,st.docs-(choice==='Immediate'?1:0)); st.beds=Math.max(0,st.beds-1); if(needsResus)st.resus=Math.max(0,st.resus-1);
+setTimeout(()=>{st.nurses=Math.min(3,st.nurses+1); st.docs=Math.min(2,st.docs+1); st.beds=Math.min(6,st.beds+1); if(needsResus)st.resus=Math.min(2,st.resus+1); render();},2000);
+st.seen++; st.queue.splice(i,1); render();}
+function render(){if(!st)return;['time','score','lives','qcount','seen','nurses','docs','beds','resus','inc'].forEach(id=>document.getElementById(id).textContent=id==='time'?fmt(st.time):st[id==='qcount'?'queue':id].length??st[id]);
+document.getElementById('pauseBtn').textContent=st.paused?'Resume':'Pause';
+const q=document.getElementById('queue');q.innerHTML='';const arr=[...st.queue].sort((a,b)=>(b.sev+b.deter*.5)-(a.sev+a.deter*.5));
+arr.forEach(p=>{const d=document.createElement('div');d.className='p';d.innerHTML=`<h3>${p.t}</h3><div class='muted'>${p.name} — ${p.d}</div><div class='badges'><span class='b'>Severity ${p.sev}</span><span class='b'>Wait ${p.wait}s</span><span class='b'>Deter ${p.deter}</span></div><div class='controls'>${LEVELS.map(l=>`<button onclick="triage(${p.id},'${l}')">${l}</button>`).join('')}</div>`;q.appendChild(d);});
+if(!arr.length)q.innerHTML="<div class='muted'>No patients waiting...</div>";}
+function togglePause(){st.paused=!st.paused;render();}
+newGame();setInterval(tick,1000);
+</script></body></html>
