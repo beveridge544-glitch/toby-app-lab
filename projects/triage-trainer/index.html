@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Triage Trainer v1</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--text:#e5e7eb;--muted:#9ca3af;--accent:#3b82f6;--ok:#10b981;--bad:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(180deg,#0b1226,#0f172a);color:var(--text)}
+    .wrap{max-width:900px;margin:0 auto;padding:16px}
+    .card{background:rgba(255,255,255,.04);border:1px solid #334155;border-radius:14px;padding:14px;margin:10px 0}
+    h1{margin:0 0 8px}.muted{color:var(--muted)}
+    button{padding:10px 12px;border-radius:10px;border:1px solid #334155;background:#0b1222;color:var(--text);cursor:pointer}
+    .primary{background:linear-gradient(90deg,#2563eb,#4f46e5);border:none}
+    .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .opt{padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1222}
+    .ok{border-color:var(--ok)} .bad{border-color:var(--bad)}
+    .row{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .pill{font-size:12px;border:1px solid #334155;border-radius:999px;padding:4px 8px;color:var(--muted)}
+    @media(max-width:700px){.opts{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Triage Trainer (v1)</h1>
+  <p class="muted">Educational scenarios only — not for live clinical decisions.</p>
+
+  <div class="card row">
+    <div>
+      <span class="pill">Score: <b id="score">0</b></span>
+      <span class="pill">Question: <b id="qnum">1</b>/10</span>
+      <span class="pill">Streak: <b id="streak">0</b></span>
+    </div>
+    <div>
+      <button onclick="resetGame()">Reset</button>
+      <button class="primary" onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 id="title">Scenario</h3>
+    <p id="scenario"></p>
+    <div class="opts" id="options"></div>
+    <div id="feedback" class="card" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const levels=['Immediate (Resus)','Very Urgent','Urgent','Standard','Non-Urgent'];
+const questions=[
+  {t:'Chest Pain + Shock',s:'56M, severe central chest pain, clammy, BP 82/50, HR 132, sats 90% RA.',a:'Immediate (Resus)',r:'Haemodynamic instability + possible ACS/shock.'},
+  {t:'Minor Laceration',s:'24F, 2cm finger cut, bleeding controlled, vitals normal, pain mild.',a:'Standard',r:'Stable, minor injury.'},
+  {t:'Anaphylaxis',s:'33M after antibiotic, wheeze, lip swelling, hypotension, stridor.',a:'Immediate (Resus)',r:'Airway/breathing/circulation compromise.'},
+  {t:'Abdo Pain stable',s:'40F, lower abdominal pain 7/10, afebrile, stable obs, no peritonism.',a:'Urgent',r:'Needs prompt assessment but currently stable.'},
+  {t:'Severe Asthma',s:'19F, speaking single words, RR 34, sats 88% RA, accessory muscle use.',a:'Immediate (Resus)',r:'Life-threatening respiratory distress.'},
+  {t:'Simple UTI symptoms',s:'30F dysuria/frequency, no flank pain/fever, obs normal.',a:'Non-Urgent',r:'Low acuity presentation.'},
+  {t:'Possible Stroke',s:'72M sudden unilateral weakness + slurred speech, onset 40 mins ago.',a:'Very Urgent',r:'Time-critical stroke pathway.'},
+  {t:'Head injury anticoagulated',s:'78F fall, head strike, on apixaban, GCS 15, mild headache.',a:'Urgent',r:'Higher risk due to anticoagulation/head injury.'},
+  {t:'Sepsis concern',s:'67M fever, confusion, HR 124, BP 95/60, RR 28.',a:'Very Urgent',r:'Likely sepsis with physiological derangement.'},
+  {t:'Ankle sprain walking',s:'21M twisted ankle, weight-bearing with pain, no deformity, obs normal.',a:'Standard',r:'Moderate acuity musculoskeletal injury.'}
+];
+let i=0, score=0, streak=0, answered=false;
+
+function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5)}
+function render(){
+  const q=questions[i];
+  document.getElementById('qnum').textContent=i+1;
+  document.getElementById('score').textContent=score;
+  document.getElementById('streak').textContent=streak;
+  document.getElementById('title').textContent=q.t;
+  document.getElementById('scenario').textContent=q.s;
+  const opts=shuffle(levels);
+  const box=document.getElementById('options'); box.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=o;
+    b.onclick=()=>answer(o,b);
+    box.appendChild(b);
+  });
+  const fb=document.getElementById('feedback'); fb.style.display='none'; fb.innerHTML='';
+  answered=false;
+}
+function answer(choice,btn){
+  if(answered) return; answered=true;
+  const q=questions[i];
+  const correct=choice===q.a;
+  const fb=document.getElementById('feedback');
+  fb.style.display='block';
+  if(correct){score++; streak++; btn.classList.add('ok'); fb.innerHTML=`✅ Correct. <br><br><b>Why:</b> ${q.r}`;}
+  else {streak=0; btn.classList.add('bad'); fb.innerHTML=`❌ Not quite. Correct answer: <b>${q.a}</b><br><br><b>Why:</b> ${q.r}`;}
+  document.getElementById('score').textContent=score;
+  document.getElementById('streak').textContent=streak;
+}
+function nextQuestion(){
+  if(i<questions.length-1){i++; render();}
+  else {
+    document.getElementById('title').textContent='Session complete';
+    document.getElementById('scenario').textContent=`Final score: ${score}/${questions.length}`;
+    document.getElementById('options').innerHTML='';
+    const fb=document.getElementById('feedback'); fb.style.display='block'; fb.innerHTML='Great work. Reset to play again.';
+  }
+}
+function resetGame(){i=0;score=0;streak=0;render();}
+render();
+</script>
+</body>
+</html>
