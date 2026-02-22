@@ -35,7 +35,7 @@
         <div class="small">Local reference library + chatbot helper. Verify with local policy / BNF / Medusa.</div>
       </div>
       <div>
-        <span class="pill">Build: 2026-02-22 18:20 UTC</span>
+        <span class="pill">Build: 2026-02-22 18:35 UTC</span>
         <span class="pill">Safety-first</span>
       </div>
     </div>
@@ -64,6 +64,14 @@
           <pre id="freqOut"></pre>
           <h3 style="margin:10px 0 8px">Emergency/important notes</h3>
           <pre id="quickOut"></pre>
+
+          <h3 style="margin:10px 0 8px">BNF verification</h3>
+          <div class="small">Track what has been checked against BNF/local policy.</div>
+          <div class="row" style="margin-top:8px">
+            <button onclick="openBnf()">Open BNF for selected med</button>
+            <button class="primary" onclick="markVerified()">Mark verified today</button>
+          </div>
+          <pre id="verifyOut"></pre>
         </div>
       </div>
     </div>
@@ -196,6 +204,42 @@ function sendChat(){
   if(low.includes('check')){bot('Two-person checks include morphine/codeine/fluids/IV/IM meds; one-person includes oral meds, salbutamol, ipratropium, etc (per local notes).');return;}
   bot('I can answer best for meds in your local list. If missing, add the medication notes and I’ll use those.');
 }
+
+const VERIFY_KEY='med-verify-v1';
+function loadVerify(){try{return JSON.parse(localStorage.getItem(VERIFY_KEY)||'{}')}catch{return {}}}
+function saveVerify(v){localStorage.setItem(VERIFY_KEY,JSON.stringify(v))}
+function selectedMed(){return document.getElementById('medSelect').value}
+function openBnf(){
+  const med=selectedMed();
+  const q=encodeURIComponent(med+' BNF NICE');
+  window.open('https://bnf.nice.org.uk/search/?q='+q,'_blank');
+}
+function markVerified(){
+  const med=selectedMed();
+  const v=loadVerify();
+  v[med]={date:new Date().toISOString().slice(0,10), by:'Oliver/Toby', source:'BNF + local policy'};
+  saveVerify(v);
+  renderVerify();
+}
+function renderVerify(){
+  const med=selectedMed();
+  const v=loadVerify()[med];
+  const lines=[`Medication: ${med}`];
+  if(v){
+    lines.push(`Verified: ${v.date}`);
+    lines.push(`By: ${v.by}`);
+    lines.push(`Source: ${v.source}`);
+    lines.push('Status: ✅ verified entry recorded');
+  } else {
+    lines.push('Verified: not yet');
+    lines.push('Status: ⚠️ verify against BNF/local policy');
+  }
+  document.getElementById('verifyOut').textContent=lines.join('\n');
+}
+
+const _renderMed = renderMed;
+renderMed = function(){ _renderMed(); renderVerify(); };
+
 init();
 </script>
 </body>
