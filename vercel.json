@@ -1,9 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/projects/nursing-shift-copilot/index.html"
-    }
+    { "source": "/", "destination": "/docs/index.html" },
+    { "source": "/apps", "destination": "/docs/apps.html" },
+    { "source": "/apps.html", "destination": "/docs/apps.html" },
+    { "source": "/progress", "destination": "/docs/progress.html" },
+    { "source": "/progress.html", "destination": "/docs/progress.html" },
+    { "source": "/triage", "destination": "/docs/triage.html" },
+    { "source": "/triage.html", "destination": "/docs/triage.html" },
+    { "source": "/triage3d", "destination": "/docs/triage3d.html" },
+    { "source": "/triage3d.html", "destination": "/docs/triage3d.html" },
+    { "source": "/floormanager", "destination": "/docs/floormanager.html" },
+    { "source": "/floormanager.html", "destination": "/docs/floormanager.html" }
   ]
 }
