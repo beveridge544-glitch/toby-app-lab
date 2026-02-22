@@ -3,197 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toby Progress Board v3</title>
+  <title>Toby Progress Board — Minimal</title>
   <style>
     :root{
-      --bg:#0b1020;--panel:#121a33;--card:#0f1730;--text:#eef2ff;--muted:#a9b1c9;--border:#2a3355;
-      --accent:#6ea8fe;--accent2:#8b7cff;--good:#16a34a;--warn:#f59e0b;--danger:#ef4444;
-    }
-    body.light{
-      --bg:#f2f5ff;--panel:#ffffff;--card:#f8faff;--text:#101828;--muted:#667085;--border:#d8e0ff;
-      --accent:#3b82f6;--accent2:#6366f1;--good:#16a34a;--warn:#d97706;--danger:#dc2626;
+      --bg:#f5f5f7; --panel:#ffffff; --text:#111111; --muted:#6e6e73; --line:#e5e5ea;
+      --backlog:#8e8e93; --progress:#0a84ff; --done:#30d158;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);transition:.2s}
-    .wrap{max-width:1200px;margin:0 auto;padding:18px}
-    .top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
-    .title{font-size:30px;font-weight:800;margin:0}
-    .muted{color:var(--muted)}
-    .btn{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer}
-    .btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:white;font-weight:700}
-    .controls{display:grid;grid-template-columns:1.2fr 130px 130px 120px;gap:8px;margin:14px 0}
-    input,select{padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text)}
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    h1{margin:0 0 6px;font-size:30px;font-weight:700;letter-spacing:-0.02em}
+    .sub{color:var(--muted);margin:0 0 16px}
 
-    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-    .chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);font-size:12px;color:var(--muted);background:var(--panel)}
+    .controls{display:grid;grid-template-columns:1fr 130px;gap:10px;margin-bottom:14px}
+    input,button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px;font-size:15px}
+    button{cursor:pointer;background:#111;color:#fff;border:none}
 
     .board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .col{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:10px;min-height:420px}
+    .col{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:360px}
     .colhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .colhead h2{margin:0;font-size:17px}
-    .count{font-size:12px;padding:4px 8px;border-radius:999px;color:white}
-    .count.backlog{background:#64748b}.count.progress{background:#7c3aed}.count.done{background:#16a34a}
+    .colhead h2{margin:0;font-size:16px;font-weight:600}
+    .count{font-size:12px;color:#fff;padding:3px 8px;border-radius:999px}
+    .count.backlog{background:var(--backlog)}
+    .count.progress{background:var(--progress)}
+    .count.done{background:var(--done)}
 
-    .list{min-height:320px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0;box-shadow:0 4px 12px rgba(0,0,0,.12)}
-    .card.dragging{opacity:.6}
-    .task{font-weight:600;line-height:1.35}
-    .meta{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-    .tag{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted)}
-    .tag.high{border-color:#7f1d1d;color:#fecaca;background:#450a0a55}
-    .tag.med{border-color:#854d0e;color:#fde68a;background:#451a0355}
-    .tag.low{border-color:#166534;color:#bbf7d0;background:#052e1655}
+    .card{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:#fff}
+    .task{font-size:15px;line-height:1.4}
+    .row{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+    .mini{border:1px solid var(--line);background:#fff;color:#111;padding:6px 9px;border-radius:8px;font-size:12px;cursor:pointer}
+    .mini.del{color:#ff3b30}
 
-    .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-    .tiny{font-size:12px;color:var(--muted)}
-    .btns{display:flex;gap:6px}
-    .mini{padding:6px 8px;border-radius:8px;border:none;cursor:pointer;color:white;font-size:12px}
-    .mini.move{background:#6366f1}.mini.del{background:#7f1d1d}
-
-    .dropzone{outline:2px dashed var(--accent);outline-offset:2px;border-radius:10px}
-
-    @media (max-width:980px){.controls{grid-template-columns:1fr 1fr}.board{grid-template-columns:1fr}}
+    @media (max-width:900px){.board{grid-template-columns:1fr}.controls{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div>
-      <h1 class="title">Toby Progress Board</h1>
-      <div class="muted">Backlog → In Progress → Done (drag cards between columns)</div>
-    </div>
-    <button class="btn" onclick="toggleTheme()" id="themeBtn">Toggle theme</button>
-  </div>
-
-  <div class="chips">
-    <span class="chip">v3 redesign</span>
-    <span class="chip">drag & drop</span>
-    <span class="chip">priority + due date</span>
-    <span class="chip">today/this week tags</span>
-  </div>
+  <h1>Toby Progress Board</h1>
+  <p class="sub">Simple view: Backlog, In Progress, Done.</p>
 
   <div class="controls">
-    <input id="newTask" placeholder="Task title..." />
-    <select id="newPriority">
-      <option value="high">High</option>
-      <option value="med" selected>Medium</option>
-      <option value="low">Low</option>
-    </select>
-    <input id="newDue" type="date" />
-    <button class="btn primary" onclick="addTask()">Add</button>
+    <input id="newTask" placeholder="Add task..." />
+    <button onclick="addTask()">Add</button>
   </div>
 
   <div class="board">
-    <div class="col" data-col="backlog" ondragover="allowDrop(event)" ondrop="dropCard(event,'backlog')">
+    <div class="col">
       <div class="colhead"><h2>Backlog</h2><span id="c-backlog" class="count backlog">0</span></div>
-      <div id="backlog" class="list"></div>
+      <div id="backlog"></div>
     </div>
-    <div class="col" data-col="progress" ondragover="allowDrop(event)" ondrop="dropCard(event,'progress')">
+    <div class="col">
       <div class="colhead"><h2>In Progress</h2><span id="c-progress" class="count progress">0</span></div>
-      <div id="progress" class="list"></div>
+      <div id="progress"></div>
     </div>
-    <div class="col" data-col="done" ondragover="allowDrop(event)" ondrop="dropCard(event,'done')">
+    <div class="col">
       <div class="colhead"><h2>Done</h2><span id="c-done" class="count done">0</span></div>
-      <div id="done" class="list"></div>
+      <div id="done"></div>
     </div>
   </div>
 </div>
 
 <script>
-const KEY='toby-progress-board-v3';
-const THEME='toby-progress-theme';
+const KEY='toby-progress-board-minimal-v1';
 const seed=[
-  {id:1,text:'Add drug-class-specific red flags',status:'backlog',priority:'high',due:''},
-  {id:2,text:'Improve medication app mobile polish',status:'progress',priority:'med',due:''},
-  {id:3,text:'Ship progress board v3 UI',status:'done',priority:'high',due:''}
+  {id:1,text:'Expand medication list with priority meds',status:'backlog'},
+  {id:2,text:'Refine prepare/administer outputs',status:'progress'},
+  {id:3,text:'Ship minimal Apple-style board',status:'done'}
 ];
-let dragId=null;
-
-function load(){const raw=localStorage.getItem(KEY);return raw?JSON.parse(raw):seed}
+function load(){const raw=localStorage.getItem(KEY); return raw?JSON.parse(raw):seed}
 function save(tasks){localStorage.setItem(KEY,JSON.stringify(tasks))}
 function nextStatus(s){return s==='backlog'?'progress':s==='progress'?'done':'backlog'}
-function fmtDate(d){if(!d) return 'No due date'; return new Date(d+'T00:00:00').toLocaleDateString();}
-function dayLabel(d){
-  if(!d) return '';
-  const due=new Date(d+'T00:00:00');
-  const now=new Date(); now.setHours(0,0,0,0);
-  const diff=(due-now)/(1000*60*60*24);
-  if(diff===0) return 'Today';
-  if(diff>0 && diff<=7) return 'This week';
-  return '';
-}
-
 function render(){
   const tasks=load();
   const buckets={backlog:0,progress:0,done:0};
   ['backlog','progress','done'].forEach(c=>document.getElementById(c).innerHTML='');
-
   tasks.forEach(t=>{
     buckets[t.status]++;
-    const when=dayLabel(t.due);
-    const card=document.createElement('div');
-    card.className='card';
-    card.draggable=true;
-    card.ondragstart=(e)=>dragStart(e,t.id);
-    card.ondragend=()=>dragEnd();
-    card.innerHTML=`
-      <div class='task'>${t.text}</div>
-      <div class='meta'>
-        <span class='tag ${t.priority}'>${t.priority.toUpperCase()}</span>
-        <span class='tag'>Due: ${fmtDate(t.due)}</span>
-        ${when?`<span class='tag'>${when}</span>`:''}
-      </div>
+    const el=document.createElement('div'); el.className='card';
+    el.innerHTML=`<div class='task'>${t.text}</div>
       <div class='row'>
-        <span class='tiny'>${t.status.replace('progress','in progress')}</span>
-        <span class='btns'>
-          <button class='mini move' onclick='move(${t.id})'>Move</button>
-          <button class='mini del' onclick='delTask(${t.id})'>Delete</button>
-        </span>
+        <button class='mini' onclick='move(${t.id})'>Move</button>
+        <button class='mini del' onclick='delTask(${t.id})'>Delete</button>
       </div>`;
-    document.getElementById(t.status).appendChild(card);
+    document.getElementById(t.status).appendChild(el);
   });
-
   document.getElementById('c-backlog').textContent=buckets.backlog;
   document.getElementById('c-progress').textContent=buckets.progress;
   document.getElementById('c-done').textContent=buckets.done;
 }
-
-function addTask(){
-  const text=document.getElementById('newTask').value.trim(); if(!text) return;
-  const priority=document.getElementById('newPriority').value;
-  const due=document.getElementById('newDue').value;
-  const tasks=load();
-  tasks.unshift({id:Date.now(),text,status:'backlog',priority,due});
-  save(tasks);
-  document.getElementById('newTask').value='';
-  render();
-}
-
-function move(id){const tasks=load().map(t=>t.id===id?({...t,status:nextStatus(t.status)}):t);save(tasks);render();}
-function delTask(id){save(load().filter(t=>t.id!==id));render();}
-
-function dragStart(e,id){dragId=id; e.target.classList.add('dragging');}
-function dragEnd(){document.querySelectorAll('.dragging').forEach(x=>x.classList.remove('dragging')); dragId=null; document.querySelectorAll('.dropzone').forEach(z=>z.classList.remove('dropzone'));}
-function allowDrop(e){e.preventDefault(); e.currentTarget.classList.add('dropzone');}
-function dropCard(e,status){
-  e.preventDefault();
-  if(!dragId) return;
-  const tasks=load().map(t=>t.id===dragId?({...t,status}):t);
-  save(tasks); render(); dragEnd();
-}
-
-function toggleTheme(){
-  const isLight=document.body.classList.toggle('light');
-  localStorage.setItem(THEME,isLight?'light':'dark');
-  document.getElementById('themeBtn').textContent=isLight?'Dark mode':'Light mode';
-}
-function initTheme(){
-  const t=localStorage.getItem(THEME)||'dark';
-  if(t==='light'){document.body.classList.add('light'); document.getElementById('themeBtn').textContent='Dark mode';}
-  else {document.getElementById('themeBtn').textContent='Light mode';}
-}
-
-initTheme();
+function addTask(){const i=document.getElementById('newTask'); const text=i.value.trim(); if(!text) return; const t=load(); t.unshift({id:Date.now(),text,status:'backlog'}); save(t); i.value=''; render();}
+function move(id){save(load().map(t=>t.id===id?({...t,status:nextStatus(t.status)}):t)); render();}
+function delTask(id){save(load().filter(t=>t.id!==id)); render();}
 render();
 </script>
 </body>
