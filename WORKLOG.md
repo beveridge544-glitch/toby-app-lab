@@ -22,3 +22,10 @@
 ### Planning / Strategy
 - Created practical sprint plan for app progress and daily execution.
 - Continued refining scope toward practical, shift-friendly clinical support format.
+
+## 2026-02-24
+
+### Product Strategy (ChartPing)
+- Locked in app name direction: **ChartPing**.
+- Documented a practical MVP plan covering live charts, watchlist, alerts, backend push flow, and Google Play compliance.
+- Added phased freemium strategy for future monetization (3 free AI analyses per 24h + Pro upsell).
