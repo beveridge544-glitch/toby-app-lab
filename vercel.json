@@ -11,6 +11,8 @@
     { "source": "/triage3d", "destination": "/docs/triage3d.html" },
     { "source": "/triage3d.html", "destination": "/docs/triage3d.html" },
     { "source": "/floormanager", "destination": "/docs/floormanager.html" },
-    { "source": "/floormanager.html", "destination": "/docs/floormanager.html" }
+    { "source": "/floormanager.html", "destination": "/docs/floormanager.html" },
+    { "source": "/crypto", "destination": "/docs/crypto.html" },
+    { "source": "/crypto.html", "destination": "/docs/crypto.html" }
   ]
 }
